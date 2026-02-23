@@ -1,18 +1,35 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
-import { mockUser } from '@/data/mockData';
+import {
+  getClientMe,
+  loginClient,
+  registerClient,
+  loginWithGoogle,
+  logoutClient,
+  verifyEmail as apiVerifyEmail,
+  verifyPhone as apiVerifyPhone,
+  resendEmail as apiResendEmail,
+  resendPhone as apiResendPhone,
+  setPhone as apiSetPhone,
+  updateClientProfile,
+  getAccessToken,
+} from '@/lib/api';
+import { getGoogleIdToken } from '@/lib/google';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: (idToken?: string) => Promise<void>;
   signup: (data: { name: string; email: string; password: string; phone: string }) => Promise<void>;
   logout: () => void;
-  updateProfile: (data: Partial<User>) => void;
+  updateProfile: (data: Partial<User>) => Promise<void>;
   verifyEmail: (code: string) => Promise<void>;
   verifyPhone: (code: string) => Promise<void>;
+  resendEmail: () => Promise<void>;
+  resendPhone: () => Promise<void>;
+  setPhone: (phone: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,69 +39,89 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('yetustore_user');
-    if (stored) {
-      setUser(JSON.parse(stored));
-    }
-    setIsLoading(false);
+    const init = async () => {
+      const token = getAccessToken();
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const me = await getClientMe();
+        setUser(me);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    init();
   }, []);
 
-  const persistUser = (u: User) => {
+  const login = async (email: string, password: string) => {
+    const u = await loginClient(email, password);
     setUser(u);
-    localStorage.setItem('yetustore_user', JSON.stringify(u));
   };
 
-  const login = async (_email: string, _password: string) => {
-    await new Promise(r => setTimeout(r, 800));
-    persistUser(mockUser);
-  };
-
-  const loginWithGoogle = async () => {
-    await new Promise(r => setTimeout(r, 800));
-    persistUser(mockUser);
+  const loginWithGoogleHandler = async (idToken?: string) => {
+    const token = idToken || await getGoogleIdToken();
+    const u = await loginWithGoogle(token);
+    setUser(u);
   };
 
   const signup = async (data: { name: string; email: string; password: string; phone: string }) => {
-    await new Promise(r => setTimeout(r, 800));
-    const newUser: User = {
-      ...mockUser,
-      id: 'user-' + Date.now(),
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      emailVerified: false,
-      phoneVerified: false,
-      createdAt: new Date().toISOString(),
-    };
-    persistUser(newUser);
+    const u = await registerClient(data);
+    setUser(u);
   };
 
   const verifyEmail = async (code: string) => {
-    await new Promise(r => setTimeout(r, 800));
-    if (code !== '123456') throw new Error('Invalid code');
-    if (user) persistUser({ ...user, emailVerified: true });
+    const u = await apiVerifyEmail(code);
+    setUser(u);
   };
 
   const verifyPhone = async (code: string) => {
-    await new Promise(r => setTimeout(r, 800));
-    if (code !== '7890') throw new Error('Invalid code');
-    if (user) persistUser({ ...user, phoneVerified: true });
+    const u = await apiVerifyPhone(code);
+    setUser(u);
+  };
+
+  const resendEmail = async () => {
+    await apiResendEmail();
+  };
+
+  const resendPhone = async () => {
+    await apiResendPhone();
+  };
+
+  const setPhone = async (phone: string) => {
+    const u = await apiSetPhone(phone);
+    setUser(u);
   };
 
   const logout = () => {
+    logoutClient();
     setUser(null);
-    localStorage.removeItem('yetustore_user');
   };
 
-  const updateProfile = (data: Partial<User>) => {
-    if (user) {
-      const updated = { ...user, ...data };
-      persistUser(updated);
-    }
+  const updateProfile = async (data: Partial<User>) => {
+    const u = await updateClientProfile(data);
+    setUser(u);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, loginWithGoogle, signup, logout, updateProfile, verifyEmail, verifyPhone }}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      login,
+      loginWithGoogle: loginWithGoogleHandler,
+      signup,
+      logout,
+      updateProfile,
+      verifyEmail,
+      verifyPhone,
+      resendEmail,
+      resendPhone,
+      setPhone,
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,13 +9,21 @@ export interface User {
   createdAt: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
   currency: string;
-  category: string;
+  categories: string[];
+  categoryNames?: string[];
   imageUrl: string;
   rating: number;
   stock: number;
@@ -32,9 +40,11 @@ export interface Order {
   scheduledDate: string;
   scheduledTime: string;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   affiliateId?: string;
+  affiliateCode?: string;
+  affiliateName?: string;
   createdAt: string;
   updatedAt: string;
   statusHistory: StatusEntry[];
@@ -45,17 +55,57 @@ export interface StatusEntry {
   timestamp: string;
 }
 
+export interface AffiliateOrderSummary {
+  id: string;
+  status: OrderStatus;
+  scheduledDate: string;
+  scheduledTime: string;
+  createdAt: string;
+}
+
 export interface AffiliateLink {
   id: string;
   userId: string;
   productId: string;
-  product: Product;
   code: string;
   url: string;
   clicks: number;
-  orders: Order[];
-  totalCommission: number;
-  validatedCommission: number;
+  ordersCount: number;
+  createdAt: string;
+  product?: Product;
+  affiliateName?: string;
+  orders?: AffiliateOrderSummary[];
+}
+
+export interface AffiliateSummary {
+  totalEarned: number;
+  totalWithdrawn: number;
+  available: number;
+  minWithdraw: number;
+  maxWithdraw: number;
+  hasBankDetails: boolean;
+  bank?: { accountName: string; bankName: string; iban: string } | null;
+}
+
+export interface AffiliatePayout {
+  id: string;
+  userId: string;
+  amount: number;
+  status: 'requested' | 'paid' | 'denied';
+  createdAt: string;
+}
+
+export interface AffiliateLinkSummary {
+  id: string;
+  userId: string;
+  productId: string;
+  code: string;
+  url: string;
+  clicks: number;
+  ordersCount: number;
+  createdAt: string;
+  product?: Product;
+  affiliateName?: string;
 }
 
 export interface Commission {

@@ -1,20 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { mockOrders, statusLabels, formatPrice } from '@/data/mockData';
+import { statusLabels, formatPrice } from '@/data/mockData';
 import { StatusBadge } from '@/components/OrderTimeline';
 import Layout from '@/components/Layout';
-import { OrderStatus } from '@/types';
-import { ShoppingBag, ChevronRight, Calendar, MapPin } from 'lucide-react';
+import { Order, OrderStatus } from '@/types';
+import { ShoppingBag, ChevronRight, Calendar, MapPin, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getMyOrders } from '@/lib/api';
+import { onSocket } from '@/lib/socket';
 
 const statusFilters: (OrderStatus | 'todos')[] = ['todos', 'agendado', 'em_progresso', 'comprado', 'cancelado'];
 
 const MyOrders = () => {
   const [filter, setFilter] = useState<OrderStatus | 'todos'>('todos');
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const data = await getMyOrders();
+    setOrders(data);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await load();
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+
+    const offOrders = onSocket('orders.updated', () => load());
+    return () => offOrders();
+  }, []);
 
   const filtered = filter === 'todos'
-    ? mockOrders
-    : mockOrders.filter(o => o.status === filter);
+    ? orders
+    : orders.filter(o => o.status === filter);
 
   return (
     <Layout>
@@ -38,7 +61,9 @@ const MyOrders = () => {
           ))}
         </div>
 
-        {filtered.length > 0 ? (
+        {loading ? (
+          <div className="py-12 text-center text-muted-foreground">Carregando pedidos...</div>
+        ) : filtered.length > 0 ? (
           <div className="space-y-3">
             {filtered.map((order, i) => (
               <motion.div
@@ -70,6 +95,12 @@ const MyOrders = () => {
                         <MapPin className="h-3 w-3" />
                         {order.address}
                       </span>
+                      {order.affiliateName && (
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          Afiliado: {order.affiliateName}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-sm font-semibold text-foreground">{formatPrice(order.product.price)}</p>
                   </div>

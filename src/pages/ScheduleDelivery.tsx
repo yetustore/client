@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { mockProducts } from '@/data/mockData';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { getProductById, createOrder } from '@/lib/api';
 import { formatPrice } from '@/data/mockData';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -14,17 +14,43 @@ import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { Product, Order } from '@/types';
 
 const timeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
 const ScheduleDelivery = () => {
   const { productId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const product = mockProducts.find(p => p.id === productId);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [address, setAddress] = useState('');
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  const [order, setOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        if (productId) {
+          const prod = await getProductById(productId);
+          setProduct(prod);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <p className="py-20 text-center text-muted-foreground">Carregando...</p>
+      </Layout>
+    );
+  }
 
   if (!product) {
     return (
@@ -34,13 +60,26 @@ const ScheduleDelivery = () => {
     );
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!address || !date || !time) {
       toast.error('Preencha todos os campos');
       return;
     }
-    setConfirmed(true);
-    toast.success('Entrega agendada com sucesso!');
+    try {
+      const affiliateCode = searchParams.get('ref') || undefined;
+      const created = await createOrder({
+        productId: product.id,
+        scheduledDate: format(date, 'yyyy-MM-dd'),
+        scheduledTime: time,
+        address,
+        affiliateCode,
+      });
+      setOrder(created);
+      setConfirmed(true);
+      toast.success('Entrega agendada com sucesso!');
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao agendar entrega');
+    }
   };
 
   if (confirmed) {
@@ -59,6 +98,9 @@ const ScheduleDelivery = () => {
             Seu pedido de <strong>{product.name}</strong> foi agendado para{' '}
             {date && format(date, "dd 'de' MMMM", { locale: pt })} às {time}.
           </p>
+          {order && (
+            <p className="mb-6 text-xs text-muted-foreground">Pedido: {order.id}</p>
+          )}
           <div className="flex justify-center gap-3">
             <Button onClick={() => navigate('/orders')}>Ver Meus Pedidos</Button>
             <Button variant="outline" onClick={() => navigate('/')}>Continuar Comprando</Button>
@@ -83,7 +125,6 @@ const ScheduleDelivery = () => {
           <h1 className="mb-1 font-display text-2xl font-bold text-foreground">Agendar Entrega</h1>
           <p className="mb-6 text-muted-foreground">Escolha o endereço, data e horário para a entrega</p>
 
-          {/* Product summary */}
           <div className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
             <img src={product.imageUrl} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
             <div className="flex-1">
@@ -93,7 +134,6 @@ const ScheduleDelivery = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Address */}
             <div>
               <Label className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
                 <MapPin className="h-4 w-4 text-primary" />
@@ -108,7 +148,6 @@ const ScheduleDelivery = () => {
               <p className="mt-1 text-xs text-muted-foreground">Digite o endereço completo para entrega</p>
             </div>
 
-            {/* Date */}
             <div>
               <Label className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
                 <CalendarIcon className="h-4 w-4 text-primary" />
@@ -139,7 +178,6 @@ const ScheduleDelivery = () => {
               </Popover>
             </div>
 
-            {/* Time */}
             <div>
               <Label className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
                 <Clock className="h-4 w-4 text-primary" />

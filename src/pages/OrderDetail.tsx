@@ -1,16 +1,48 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockOrders, formatPrice, statusLabels } from '@/data/mockData';
+import { useEffect, useState } from 'react';
+import { getMyOrders } from '@/lib/api';
+import { formatPrice, statusLabels } from '@/data/mockData';
 import OrderTimeline, { StatusBadge } from '@/components/OrderTimeline';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Calendar, Clock, Package } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Package, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
+import { Order } from '@/types';
+import { onSocket } from '@/lib/socket';
 
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const order = mockOrders.find(o => o.id === id);
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const orders = await getMyOrders();
+    const found = orders.find(o => o.id === id) || null;
+    setOrder(found);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await load();
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+
+    const offOrders = onSocket('orders.updated', () => load());
+    return () => offOrders();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="py-20 text-center text-muted-foreground">Carregando...</div>
+      </Layout>
+    );
+  }
 
   if (!order) {
     return (
@@ -24,10 +56,6 @@ const OrderDetail = () => {
   }
 
   const canCancel = order.status === 'agendado';
-
-  const handleCancel = () => {
-    toast.success('Pedido cancelado (simulação)');
-  };
 
   return (
     <Layout>
@@ -49,17 +77,15 @@ const OrderDetail = () => {
             <StatusBadge status={order.status} />
           </div>
 
-          {/* Product */}
           <div className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
             <img src={order.product.imageUrl} alt={order.product.name} className="h-20 w-20 rounded-lg object-cover" />
             <div>
               <h3 className="font-semibold text-foreground">{order.product.name}</h3>
-              <p className="text-sm text-muted-foreground">{order.product.category}</p>
+              <p className="text-sm text-muted-foreground">{statusLabels[order.status]}</p>
               <p className="mt-1 font-display text-lg font-bold text-foreground">{formatPrice(order.product.price)}</p>
             </div>
           </div>
 
-          {/* Details */}
           <div className="mb-6 grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-3">
             <div className="flex items-start gap-3">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -84,15 +110,23 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Timeline */}
+          {order.affiliateName && (
+            <div className="mb-6 rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users className="h-4 w-4" />
+                Afiliado: <span className="text-foreground font-medium">{order.affiliateName}</span>
+              </div>
+            </div>
+          )}
+
           <div className="mb-6 rounded-xl border border-border bg-card p-4">
             <h3 className="mb-4 font-display text-base font-semibold text-foreground">Linha do Tempo</h3>
             <OrderTimeline history={order.statusHistory} />
           </div>
 
           {canCancel && (
-            <Button variant="destructive" onClick={handleCancel} className="w-full">
-              Cancelar Pedido
+            <Button variant="destructive" className="w-full" disabled>
+              Cancelar Pedido (indisponível)
             </Button>
           )}
         </div>

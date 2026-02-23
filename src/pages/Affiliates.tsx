@@ -1,34 +1,77 @@
-import { mockAffiliateLinks, formatPrice, statusLabels } from '@/data/mockData';
-import { StatusBadge } from '@/components/OrderTimeline';
+import { useEffect, useState } from 'react';
+import { formatPrice } from '@/data/mockData';
 import Layout from '@/components/Layout';
-import { Copy, Link2, MousePointerClick, ShoppingBag, DollarSign, TrendingUp } from 'lucide-react';
+import { Copy, Link2, MousePointerClick, ShoppingBag, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { AffiliateLink } from '@/types';
+import { getMyAffiliateLinks, getAffiliateSummary, requestAffiliateWithdraw } from '@/lib/api';
+import { onSocket } from '@/lib/socket';
+import { StatusBadge } from '@/components/OrderTimeline';
+import { Link } from 'react-router-dom';
 
 const Affiliates = () => {
-  const totalCommission = mockAffiliateLinks.reduce((a, l) => a + l.totalCommission, 0);
-  const validatedCommission = mockAffiliateLinks.reduce((a, l) => a + l.validatedCommission, 0);
-  const totalClicks = mockAffiliateLinks.reduce((a, l) => a + l.clicks, 0);
-  const totalOrders = mockAffiliateLinks.reduce((a, l) => a + l.orders.length, 0);
+  const [links, setLinks] = useState<AffiliateLink[]>([]);
+  const [summary, setSummary] = useState({ totalEarned: 0, totalWithdrawn: 0, available: 0, minWithdraw: 0, maxWithdraw: 0 });
+
+  const load = async () => {
+    const [linksData, summaryData] = await Promise.all([
+      getMyAffiliateLinks(),
+      getAffiliateSummary(),
+    ]);
+    setLinks(linksData);
+    setSummary(summaryData);
+  };
+
+  useEffect(() => {
+    load();
+    const off = onSocket('affiliates.updated', () => load());
+    return () => off();
+  }, []);
+
+  const totalClicks = links.reduce((a, l) => a + (l.clicks || 0), 0);
+  const totalOrders = links.reduce((a, l) => a + (l.ordersCount || 0), 0);
+  const totalLinks = links.length;
 
   const copyLink = (url: string) => {
     navigator.clipboard?.writeText(url);
     toast.success('Link copiado!');
   };
 
+  const handleWithdraw = async () => {
+    if (summary.available <= 0) return;
+    try {
+      await requestAffiliateWithdraw(summary.available);
+      toast.success('Saque solicitado');
+      load();
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao solicitar saque');
+    }
+  };
+
   return (
     <Layout>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="mb-1 font-display text-3xl font-bold text-foreground">Programa de Afiliados</h1>
-        <p className="mb-6 text-muted-foreground">Compartilhe links e ganhe comissões por vendas</p>
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-foreground">Programa de Afiliados</h1>
+            <p className="text-muted-foreground">Compartilhe links e acompanhe seus resultados</p>
+          </div>
+          <Link
+            to="/affiliates/payouts"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-semibold"
+          >
+            Histórico de Saques
+          </Link>
+        </div>
 
-        {/* Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-5">
           {[
+            { label: 'Links Gerados', value: totalLinks.toString(), icon: Link2, color: 'text-primary' },
             { label: 'Cliques Totais', value: totalClicks.toString(), icon: MousePointerClick, color: 'text-info' },
-            { label: 'Pedidos Gerados', value: totalOrders.toString(), icon: ShoppingBag, color: 'text-primary' },
-            { label: 'Comissão Total', value: formatPrice(totalCommission), icon: TrendingUp, color: 'text-warning' },
-            { label: 'Comissão Validada', value: formatPrice(validatedCommission), icon: DollarSign, color: 'text-success' },
+            { label: 'Pedidos Gerados', value: totalOrders.toString(), icon: ShoppingBag, color: 'text-warning' },
+            { label: 'Ganhos (5%)', value: formatPrice(summary.totalEarned), icon: Wallet, color: 'text-success' },
+            { label: 'Sacado', value: formatPrice(summary.totalWithdrawn), icon: Wallet, color: 'text-muted-foreground' },
           ].map((stat, i) => {
             const Icon = stat.icon;
             return (
@@ -47,10 +90,9 @@ const Affiliates = () => {
           })}
         </div>
 
-        {/* Links */}
         <h2 className="mb-4 font-display text-xl font-semibold text-foreground">Meus Links</h2>
         <div className="space-y-4">
-          {mockAffiliateLinks.map((link, i) => (
+          {links.map((link, i) => (
             <motion.div
               key={link.id}
               initial={{ opacity: 0, y: 10 }}
@@ -59,9 +101,9 @@ const Affiliates = () => {
               className="rounded-xl border border-border bg-card p-4 shadow-card"
             >
               <div className="mb-3 flex items-start gap-4">
-                <img src={link.product.imageUrl} alt={link.product.name} className="h-14 w-14 rounded-lg object-cover" />
+                <img src={link.product?.imageUrl} alt={link.product?.name} className="h-14 w-14 rounded-lg object-cover" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">{link.product.name}</h3>
+                  <h3 className="font-semibold text-foreground">{link.product?.name}</h3>
                   <div className="mt-1 flex items-center gap-2">
                     <div className="flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5">
                       <Link2 className="h-3 w-3 text-muted-foreground" />
@@ -77,18 +119,17 @@ const Affiliates = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Comissão</p>
-                  <p className="font-display font-bold text-foreground">{formatPrice(link.validatedCommission)}</p>
+                  <p className="text-xs text-muted-foreground">Cliques</p>
+                  <p className="font-display font-bold text-foreground">{link.clicks}</p>
                 </div>
               </div>
 
               <div className="flex gap-4 border-t border-border pt-3 text-xs text-muted-foreground">
-                <span>{link.clicks} cliques</span>
-                <span>{link.orders.length} pedidos</span>
-                <span>Pendente: {formatPrice(link.totalCommission - link.validatedCommission)}</span>
+                <span>{link.ordersCount} pedidos</span>
+                <span>Produto: {formatPrice(link.product?.price || 0)}</span>
               </div>
 
-              {link.orders.length > 0 && (
+              {link.orders && link.orders.length > 0 && (
                 <div className="mt-3 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">Pedidos via este link:</p>
                   {link.orders.map(order => (
@@ -101,12 +142,11 @@ const Affiliates = () => {
               )}
             </motion.div>
           ))}
-        </div>
-
-        <div className="mt-6 rounded-xl border border-border bg-primary/5 p-4">
-          <p className="text-sm text-foreground">
-            <strong>💡 Como funciona:</strong> Comissões são validadas automaticamente quando o status do pedido muda para "Comprado" (5% do valor do produto).
-          </p>
+          {links.length === 0 && (
+            <div className="rounded-xl border border-border bg-card py-16 text-center text-muted-foreground">
+              Nenhum link gerado ainda
+            </div>
+          )}
         </div>
       </motion.div>
     </Layout>

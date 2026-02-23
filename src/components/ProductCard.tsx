@@ -4,7 +4,7 @@ import { formatPrice } from '@/data/mockData';
 import { Star, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const ProductCard = ({ product, index }: { product: Product; index: number }) => {
+const ProductCard = ({ product, index, categoryLabel }: { product: Product; index: number; categoryLabel?: string }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -24,9 +24,11 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
           />
         </div>
         <div className="p-4">
-          <span className="mb-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-            {product.category}
-          </span>
+          {categoryLabel && (
+            <span className="mb-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              {categoryLabel}
+            </span>
+          )}
           <h3 className="mb-1 font-display text-base font-semibold text-foreground line-clamp-1">
             {product.name}
           </h3>
