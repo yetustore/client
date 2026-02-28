@@ -1,6 +1,6 @@
-import { OrderStatus } from '@/types';
+import { OrderStatus, StatusEntry } from '@/types';
 import { statusLabels } from '@/data/mockData';
-import { Check, X, Clock, ShoppingCart } from 'lucide-react';
+import { Check, X, Clock, ShoppingCart, Truck, Phone } from 'lucide-react';
 
 const statusConfig: Record<OrderStatus, { icon: typeof Check; color: string; bg: string }> = {
   agendado: { icon: Clock, color: 'text-info', bg: 'bg-info/10 border-info/30' },
@@ -20,7 +20,7 @@ export const StatusBadge = ({ status }: { status: OrderStatus }) => {
   );
 };
 
-const OrderTimeline = ({ history }: { history: { status: OrderStatus; timestamp: string }[] }) => {
+const OrderTimeline = ({ history }: { history: StatusEntry[] }) => {
   const allStatuses: OrderStatus[] = ['agendado', 'em_progresso', 'comprado'];
   const isCancelled = history.some(h => h.status === 'cancelado');
 
@@ -28,7 +28,7 @@ const OrderTimeline = ({ history }: { history: { status: OrderStatus; timestamp:
     ? history
     : allStatuses.map(s => {
         const entry = history.find(h => h.status === s);
-        return { status: s, timestamp: entry?.timestamp || '' };
+        return { status: s, timestamp: entry?.timestamp || '', adminName: entry?.adminName, adminPhone: entry?.adminPhone };
       });
 
   return (
@@ -68,6 +68,19 @@ const OrderTimeline = ({ history }: { history: { status: OrderStatus; timestamp:
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
+                </p>
+              )}
+              {step.status === 'em_progresso' && (step.adminName || step.adminPhone) && (
+                <p className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                  <Truck className="h-3.5 w-3.5" />
+                  <span>Entregador:</span>
+                  <span>{step.adminName || 'N/D'}</span>
+                  {step.adminPhone && (
+                    <span className="inline-flex items-center gap-1">
+                      <Phone className="h-3.5 w-3.5" />
+                      {step.adminPhone}
+                    </span>
+                  )}
                 </p>
               )}
             </div>

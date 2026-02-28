@@ -53,6 +53,8 @@ export interface Order {
 export interface StatusEntry {
   status: OrderStatus;
   timestamp: string;
+  adminName?: string;
+  adminPhone?: string;
 }
 
 export interface AffiliateOrderSummary {
