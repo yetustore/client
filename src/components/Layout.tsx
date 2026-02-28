@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Package, ShoppingBag, Users, User, LogOut, Menu, X, Home } from 'lucide-react';
+import { ShoppingBag, Users, User, LogOut, Menu, X, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
@@ -28,8 +28,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
-              <Package className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 p-1 shadow-card">
+              <img
+                src="/logo.png"
+                alt="YetuStore"
+                className="h-full w-full rounded-md object-cover"
+              />
             </div>
             <span className="font-display text-xl font-bold text-foreground">YetuStore</span>
           </Link>
@@ -130,3 +134,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default Layout;
+
+
+
+
+
+

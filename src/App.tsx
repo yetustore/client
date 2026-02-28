@@ -11,13 +11,13 @@ import VerifyAccount from "./pages/VerifyAccount";
 import ForgotPassword from "./pages/ForgotPassword";
 import AffiliateRedirect from "./pages/AffiliateRedirect";
 import AffiliatePayouts from "./pages/AffiliatePayouts";
-import LandingPage from "./pages/LandingPage";
 import ProductDetail from "./pages/ProductDetail";
 import ScheduleDelivery from "./pages/ScheduleDelivery";
 import MyOrders from "./pages/MyOrders";
 import OrderDetail from "./pages/OrderDetail";
 import Affiliates from "./pages/Affiliates";
 import Profile from "./pages/Profile";
+import First from "@/components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,11 +30,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/first-visit" element={<First />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/forgot" element={<ForgotPassword />} />
             <Route path="/verify" element={<VerifyAccount />} />
             <Route path="/r/:code" element={<AffiliateRedirect />} />
-            <Route path="/landing" element={<LandingPage />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
             <Route path="/schedule/:productId" element={<ProtectedRoute><ScheduleDelivery /></ProtectedRoute>} />
