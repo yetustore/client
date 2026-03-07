@@ -395,7 +395,7 @@ const ScheduleDelivery = () => {
               <div>
                 <Label className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
                   <Clock className="h-4 w-4 text-primary" />
-                  Hor�rio (09:00 - 17:00)
+                  Horário (09:00 - 17:00)
                 </Label>
                 <div className="mt-1 grid grid-cols-3 gap-2 sm:grid-cols-6">
                   {timeSlots.map(slot => (
