@@ -9,6 +9,7 @@ declare global {
           prompt: (callback?: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void;
         };
       };
+      maps?: any;
     };
   }
 }

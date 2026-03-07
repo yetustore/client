@@ -1,10 +1,11 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import VerifyAccount from "./pages/VerifyAccount";
@@ -29,22 +30,69 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/first-visit" element={<First />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/forgot" element={<ForgotPassword />} />
-            <Route path="/verify" element={<VerifyAccount />} />
-            <Route path="/r/:code" element={<AffiliateRedirect />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
-            <Route path="/schedule/:productId" element={<ProtectedRoute><ScheduleDelivery /></ProtectedRoute>} />
-            <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-            <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
-            <Route path="/affiliates" element={<ProtectedRoute><Affiliates /></ProtectedRoute>} />
-            <Route path="/affiliates/payouts" element={<ProtectedRoute><AffiliatePayouts /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="min-h-screen bg-background flex flex-col">
+            <div className="flex-1">
+              <Routes>
+                <Route path="/first-visit" element={<First />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/forgot" element={<ForgotPassword />} />
+                <Route path="/verify" element={<VerifyAccount />} />
+                <Route path="/r/:code" element={<AffiliateRedirect />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route
+                  path="/schedule/:productId"
+                  element={
+                    <ProtectedRoute>
+                      <ScheduleDelivery />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <ProtectedRoute>
+                      <MyOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders/:id"
+                  element={
+                    <ProtectedRoute>
+                      <OrderDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/affiliates"
+                  element={
+                    <ProtectedRoute>
+                      <Affiliates />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/affiliates/payouts"
+                  element={
+                    <ProtectedRoute>
+                      <AffiliatePayouts />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+            <Footer />
+          </div>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

@@ -22,7 +22,7 @@ const FirstVisitLoading = () => (
       />
     </div>
     <div>
-      <p className="font-display text-2xl font-bold text-foreground">Bem-vindo à YetuStore</p>
+      <p className="font-display text-2xl font-bold text-foreground">Bem-vindo ï¿½ YetuStore</p>
       <p className="mt-1 text-sm text-muted-foreground">Estamos preparando o seu acesso...</p>
     </div>
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -41,6 +41,8 @@ const Auth = () => {
   const { login, signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const googleBtnRef = useRef<HTMLDivElement | null>(null);
+
+  const redirectTo = searchParams.get("redirect") || "/";
 
   useEffect(() => {
     const m = searchParams.get("mode");
@@ -71,7 +73,7 @@ const Auth = () => {
             try {
               await loginWithGoogle(token);
               toast.success("Login com Google realizado!");
-              navigate("/");
+              navigate(redirectTo);
             } catch (err: any) {
               toast.error(err?.message || "Erro ao autenticar com Google");
             } finally {
@@ -96,7 +98,7 @@ const Auth = () => {
     return () => {
       mounted = false;
     };
-  }, [loginWithGoogle, navigate]);
+  }, [loginWithGoogle, navigate, redirectTo]);
 
   const [form, setForm] = useState({
     name: "",
@@ -112,7 +114,7 @@ const Auth = () => {
       if (mode === "login") {
         await login(form.email, form.password);
         toast.success("Bem-vindo de volta!");
-        navigate("/");
+        navigate(redirectTo);
       } else {
         await signup(form);
         toast.success("Conta criada! Verifique seu email.");
@@ -322,6 +324,3 @@ const Auth = () => {
 };
 
 export default Auth;
-
-
-

@@ -16,6 +16,11 @@ export interface Category {
   createdAt?: string;
 }
 
+export type ProductMedia = {
+  type: 'image' | 'video';
+  url: string;
+};
+
 export interface Product {
   id: string;
   name: string;
@@ -25,6 +30,7 @@ export interface Product {
   categories: string[];
   categoryNames?: string[];
   imageUrl: string;
+  media?: ProductMedia[];
   rating: number;
   stock: number;
 }

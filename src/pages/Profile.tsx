@@ -10,6 +10,20 @@ import { motion } from 'framer-motion';
 import { formatPrice } from '@/data/mockData';
 import { toast } from 'sonner';
 import { AffiliatePayout } from '@/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import PaginationControls from '@/components/PaginationControls';
+
+const PAGE_SIZE = 5;
+
+const PayoutSkeleton = () => (
+  <div className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-3">
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-3 w-24" />
+    </div>
+    <Skeleton className="h-4 w-16" />
+  </div>
+);
 
 const Profile = () => {
   const { user, updateProfile, setPhone } = useAuth();
@@ -27,6 +41,8 @@ const Profile = () => {
     bank: { accountName: '', bankName: '', iban: '' },
   });
   const [paidPayouts, setPaidPayouts] = useState<AffiliatePayout[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setName(user?.name || '');
@@ -43,8 +59,23 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    load();
+    const init = async () => {
+      try {
+        await load();
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    init();
   }, []);
+
+  const pageCount = Math.max(1, Math.ceil(paidPayouts.length / PAGE_SIZE));
+  useEffect(() => {
+    setPage(p => Math.min(p, pageCount));
+  }, [pageCount]);
+
+  const pagedPayouts = paidPayouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const showSkeleton = loadingData && paidPayouts.length === 0;
 
   const handleSave = async () => {
     if (!user) return;
@@ -154,21 +185,27 @@ const Profile = () => {
         <div className="rounded-xl border border-border bg-card p-4 shadow-card">
           <h3 className="mb-4 font-display text-base font-semibold text-foreground">Histórico de Ganhos</h3>
           <div className="space-y-3">
-            {paidPayouts.map((p) => (
-              <div key={p.id} className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Saque aprovado</p>
-                  <p className="text-xs text-muted-foreground">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</p>
+            {showSkeleton ? (
+              Array.from({ length: 3 }).map((_, i) => <PayoutSkeleton key={`payout-skeleton-${i}`} />)
+            ) : pagedPayouts.length > 0 ? (
+              pagedPayouts.map((p) => (
+                <div key={p.id} className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Saque aprovado</p>
+                    <p className="text-xs text-muted-foreground">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <span className="font-display font-bold text-success">+{formatPrice(p.amount)}</span>
                 </div>
-                <span className="font-display font-bold text-success">+{formatPrice(p.amount)}</span>
-              </div>
-            ))}
-            {paidPayouts.length === 0 && (
+              ))
+            ) : (
               <div className="rounded-lg bg-secondary/50 px-4 py-3 text-sm text-muted-foreground">
                 Nenhum saque aprovado
               </div>
             )}
           </div>
+          {!showSkeleton && paidPayouts.length > 0 && (
+            <PaginationControls page={page} pageCount={pageCount} onPageChange={setPage} />
+          )}
         </div>
       </motion.div>
     </Layout>
