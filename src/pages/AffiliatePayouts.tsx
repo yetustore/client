@@ -5,12 +5,16 @@ import { AffiliatePayout } from '@/types';
 import { Pencil } from 'lucide-react';
 import { formatPrice } from '@/data/mockData';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import PaginationControls from '@/components/PaginationControls';
 
 const statusLabel: Record<AffiliatePayout['status'], { label: string; className: string }> = {
   requested: { label: 'Solicitado', className: 'text-warning' },
   paid: { label: 'Pago', className: 'text-success' },
   denied: { label: 'Negado', className: 'text-destructive' },
 };
+
+const PAGE_SIZE = 8;
 
 const AffiliatePayouts = () => {
   const [payouts, setPayouts] = useState<AffiliatePayout[]>([]);
@@ -24,9 +28,11 @@ const AffiliatePayouts = () => {
     bank: { accountName: '', bankName: '', iban: '' },
   });
   const [amount, setAmount] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [bank, setBank] = useState({ accountName: '', bankName: '', iban: '' });
   const [editingBank, setEditingBank] = useState(false);
+  const [page, setPage] = useState(1);
 
   const load = async () => {
     const [payoutData, summaryData] = await Promise.all([
@@ -40,13 +46,28 @@ const AffiliatePayouts = () => {
   };
 
   useEffect(() => {
-    load();
+    const init = async () => {
+      try {
+        await load();
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    init();
   }, []);
+
+  const pageCount = Math.max(1, Math.ceil(payouts.length / PAGE_SIZE));
+  useEffect(() => {
+    setPage(p => Math.min(p, pageCount));
+  }, [pageCount]);
+
+  const pagedPayouts = payouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const showSkeleton = loadingData && payouts.length === 0;
 
   const handleWithdraw = async () => {
     const value = Number(amount);
     if (!value || value <= 0) return;
-    setLoading(true);
+    setWithdrawing(true);
     try {
       await requestAffiliateWithdraw(value);
       toast.success('Saque solicitado');
@@ -55,7 +76,7 @@ const AffiliatePayouts = () => {
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao solicitar saque');
     } finally {
-      setLoading(false);
+      setWithdrawing(false);
     }
   };
 
@@ -149,7 +170,7 @@ const AffiliatePayouts = () => {
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Disponível</p>
           <p className="text-lg font-bold text-foreground">{formatPrice(summary.available)}</p>
-              <p className="mt-2 text-xs text-muted-foreground">Mínimo {formatPrice(summary.minWithdraw)} | Máximo {formatPrice(summary.maxWithdraw)}</p>
+          <p className="mt-2 text-xs text-muted-foreground">Mínimo {formatPrice(summary.minWithdraw)} | Máximo {formatPrice(summary.maxWithdraw)}</p>
 
           <div className="mt-4 flex gap-2">
             <input
@@ -160,7 +181,7 @@ const AffiliatePayouts = () => {
             />
             <button
               onClick={handleWithdraw}
-              disabled={loading || !summary.hasBankDetails}
+              disabled={withdrawing || !summary.hasBankDetails}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >
               Solicitar
@@ -184,18 +205,28 @@ const AffiliatePayouts = () => {
               </tr>
             </thead>
             <tbody>
-              {payouts.map(p => (
-                <tr key={p.id} className="border-t border-border">
-                  <td className="p-3">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
-                  <td className="p-3">{formatPrice(p.amount)}</td>
-                  <td className="p-3">
-                    <span className={`text-xs font-semibold ${statusLabel[p.status].className}`}>
-                      {statusLabel[p.status].label}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {payouts.length === 0 && (
+              {showSkeleton ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`payout-skeleton-${i}`} className="border-t border-border">
+                    <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+                    <td className="p-3"><Skeleton className="h-4 w-20" /></td>
+                    <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+                  </tr>
+                ))
+              ) : (
+                pagedPayouts.map(p => (
+                  <tr key={p.id} className="border-t border-border">
+                    <td className="p-3">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
+                    <td className="p-3">{formatPrice(p.amount)}</td>
+                    <td className="p-3">
+                      <span className={`text-xs font-semibold ${statusLabel[p.status].className}`}>
+                        {statusLabel[p.status].label}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+              {!showSkeleton && payouts.length === 0 && (
                 <tr>
                   <td className="p-3 text-muted-foreground" colSpan={3}>Nenhum saque registrado</td>
                 </tr>
@@ -203,6 +234,9 @@ const AffiliatePayouts = () => {
             </tbody>
           </table>
         </div>
+        {!showSkeleton && payouts.length > 0 && (
+          <PaginationControls page={page} pageCount={pageCount} onPageChange={setPage} />
+        )}
       </div>
     </Layout>
   );

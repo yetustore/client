@@ -8,13 +8,31 @@ import { ShoppingBag, ChevronRight, Calendar, MapPin, Users } from 'lucide-react
 import { motion } from 'framer-motion';
 import { getMyOrders } from '@/lib/api';
 import { onSocket } from '@/lib/socket';
+import { Skeleton } from '@/components/ui/skeleton';
+import PaginationControls from '@/components/PaginationControls';
 
 const statusFilters: (OrderStatus | 'todos')[] = ['todos', 'agendado', 'em_progresso', 'comprado', 'cancelado'];
+const PAGE_SIZE = 6;
+
+const OrderCardSkeleton = () => (
+  <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card">
+    <Skeleton className="h-16 w-16 rounded-lg" />
+    <div className="flex-1 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-4 w-20" />
+      </div>
+      <Skeleton className="h-3 w-3/4" />
+      <Skeleton className="h-4 w-24" />
+    </div>
+  </div>
+);
 
 const MyOrders = () => {
   const [filter, setFilter] = useState<OrderStatus | 'todos'>('todos');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   const load = async () => {
     const data = await getMyOrders();
@@ -35,9 +53,21 @@ const MyOrders = () => {
     return () => offOrders();
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
   const filtered = filter === 'todos'
     ? orders
     : orders.filter(o => o.status === filter);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  useEffect(() => {
+    setPage(p => Math.min(p, pageCount));
+  }, [pageCount]);
+
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const showSkeleton = loading && orders.length === 0;
 
   return (
     <Layout>
@@ -61,54 +91,61 @@ const MyOrders = () => {
           ))}
         </div>
 
-        {loading ? (
-          <div className="py-12 text-center text-muted-foreground">Carregando pedidos...</div>
-        ) : filtered.length > 0 ? (
+        {showSkeleton ? (
           <div className="space-y-3">
-            {filtered.map((order, i) => (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Link
-                  to={`/orders/${order.id}`}
-                  className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-elevated"
-                >
-                  <img
-                    src={order.product.imageUrl}
-                    alt={order.product.name}
-                    className="h-16 w-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <h3 className="font-semibold text-foreground truncate">{order.product.name}</h3>
-                      <StatusBadge status={order.status} />
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {order.scheduledDate} às {order.scheduledTime}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {order.address}
-                      </span>
-                      {order.affiliateName && (
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          Afiliado: {order.affiliateName}
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 text-sm font-semibold text-foreground">{formatPrice(order.product.price)}</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                </Link>
-              </motion.div>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <OrderCardSkeleton key={`order-skeleton-${i}`} />
             ))}
           </div>
+        ) : filtered.length > 0 ? (
+          <>
+            <div className="space-y-3">
+              {paged.map((order, i) => (
+                <motion.div
+                  key={order.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <Link
+                    to={`/orders/${order.id}`}
+                    className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-elevated"
+                  >
+                    <img
+                      src={order.product.imageUrl}
+                      alt={order.product.name}
+                      className="h-16 w-16 rounded-lg object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-foreground truncate">{order.product.name}</h3>
+                        <StatusBadge status={order.status} />
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {order.scheduledDate} às {order.scheduledTime}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {order.address}
+                        </span>
+                        {order.affiliateName && (
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            Afiliado: {order.affiliateName}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm font-semibold text-foreground">{formatPrice(order.product.price)}</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+            <PaginationControls page={page} pageCount={pageCount} onPageChange={setPage} />
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 text-center">
             <ShoppingBag className="mb-3 h-10 w-10 text-muted-foreground" />

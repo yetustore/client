@@ -1,19 +1,42 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import ProductCard from '@/components/ProductCard';
 import Layout from '@/components/Layout';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { getCategories, getProducts } from '@/lib/api';
 import { Category, Product } from '@/types';
 import { onSocket } from '@/lib/socket';
+import PaginationControls from '@/components/PaginationControls';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+const ProductCardSkeleton = () => (
+  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+    <Skeleton className="h-32 w-full sm:h-36 md:h-40" />
+    <div className="flex flex-1 flex-col gap-2 p-3 sm:p-3.5">
+      <Skeleton className="h-3 w-20" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-3 w-3/4" />
+      <div className="mt-auto flex items-center justify-between">
+        <Skeleton className="h-5 w-20" />
+        <Skeleton className="h-4 w-10" />
+      </div>
+      <Skeleton className="h-3 w-24" />
+    </div>
+  </div>
+);
 
 const Index = () => {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('all');
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = isMobile ? 8 : 15;
+  const skeletonCount = pageSize;
 
   const load = async () => {
     const [cats, prods] = await Promise.all([getCategories(), getProducts()]);
@@ -40,12 +63,24 @@ const Index = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, categoryId, pageSize]);
+
   const filtered = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.description.toLowerCase().includes(search.toLowerCase());
     const matchCategory = categoryId === 'all' || p.categories.includes(categoryId);
     return matchSearch && matchCategory;
   });
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  useEffect(() => {
+    setPage(p => Math.min(p, pageCount));
+  }, [pageCount]);
+
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const showSkeleton = loading && products.length === 0;
 
   const categoryName = (ids: string[]) => {
     const names = ids.map(id => categories.find(c => c.id === id)?.name).filter(Boolean);
@@ -98,14 +133,22 @@ const Index = () => {
           ))}
         </div>
 
-        {loading ? (
-          <div className="py-12 text-center text-muted-foreground">Carregando produtos...</div>
-        ) : filtered.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} categoryLabel={categoryName(product.categories)} />
+        {showSkeleton ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+            {Array.from({ length: skeletonCount }).map((_, i) => (
+              <ProductCardSkeleton key={`product-skeleton-${i}`} />
             ))}
           </div>
+        ) : filtered.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+              {paged.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} categoryLabel={categoryName(product.categories)} />
+              ))}
+            </div>
+            <PaginationControls page={page} pageCount={pageCount} onPageChange={setPage} />
+
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 text-center">
             <Search className="mb-3 h-10 w-10 text-muted-foreground" />
@@ -119,3 +162,9 @@ const Index = () => {
 };
 
 export default Index;
+
+
+
+
+
+

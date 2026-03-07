@@ -12,7 +12,7 @@ const navItems = [
 ];
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -38,54 +38,73 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <span className="font-display text-xl font-bold text-foreground">YetuStore</span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-1 md:flex">
-            {navItems.map(item => {
-              const Icon = item.icon;
-              const active = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                {user?.name?.charAt(0) || 'U'}
-              </div>
-              <span className="text-sm font-medium text-foreground">{user?.name}</span>
+          {!isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/auth"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+              >
+                Entrar
+              </Link>
+              <Link
+                to="/auth?mode=signup"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Registrar
+              </Link>
             </div>
-            <button
-              onClick={handleLogout}
-              className="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:block"
-              title="Sair"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="rounded-lg p-2 text-muted-foreground md:hidden"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
+          ) : (
+            <>
+              {/* Desktop nav */}
+              <nav className="hidden items-center gap-1 md:flex">
+                {navItems.map(item => {
+                  const Icon = item.icon;
+                  const active = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        active
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="flex items-center gap-3">
+                <div className="hidden items-center gap-2 md:flex">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                    {user?.name?.charAt(0) || 'U'}
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{user?.name}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive md:block"
+                  title="Sair"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setMobileOpen(!mobileOpen)}
+                  className="rounded-lg p-2 text-muted-foreground md:hidden"
+                >
+                  {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Mobile nav */}
         <AnimatePresence>
-          {mobileOpen && (
+          {isAuthenticated && mobileOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -134,9 +153,3 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default Layout;
-
-
-
-
-
-
