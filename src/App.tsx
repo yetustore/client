@@ -2,7 +2,7 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Footer from "@/components/Footer";
@@ -23,6 +23,77 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppShell = () => {
+  const location = useLocation();
+  const showFooter = location.pathname === "/" || location.pathname === "/auth";
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="flex-1">
+        <Routes>
+          <Route path="/first-visit" element={<First />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot" element={<ForgotPassword />} />
+          <Route path="/verify" element={<VerifyAccount />} />
+          <Route path="/r/:code" element={<AffiliateRedirect />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route
+            path="/schedule/:productId"
+            element={
+              <ProtectedRoute>
+                <ScheduleDelivery />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <MyOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/:id"
+            element={
+              <ProtectedRoute>
+                <OrderDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/affiliates"
+            element={
+              <ProtectedRoute>
+                <Affiliates />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/affiliates/payouts"
+            element={
+              <ProtectedRoute>
+                <AffiliatePayouts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+      {showFooter && <Footer />}
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -30,69 +101,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-background flex flex-col">
-            <div className="flex-1">
-              <Routes>
-                <Route path="/first-visit" element={<First />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/forgot" element={<ForgotPassword />} />
-                <Route path="/verify" element={<VerifyAccount />} />
-                <Route path="/r/:code" element={<AffiliateRedirect />} />
-                <Route path="/" element={<Index />} />
-                <Route path="/products/:id" element={<ProductDetail />} />
-                <Route
-                  path="/schedule/:productId"
-                  element={
-                    <ProtectedRoute>
-                      <ScheduleDelivery />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders"
-                  element={
-                    <ProtectedRoute>
-                      <MyOrders />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders/:id"
-                  element={
-                    <ProtectedRoute>
-                      <OrderDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/affiliates"
-                  element={
-                    <ProtectedRoute>
-                      <Affiliates />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/affiliates/payouts"
-                  element={
-                    <ProtectedRoute>
-                      <AffiliatePayouts />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-            <Footer />
-          </div>
+          <AppShell />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
