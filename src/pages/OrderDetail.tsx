@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+﻿import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getMyOrders } from '@/lib/api';
 import { formatPrice, statusLabels } from '@/data/mockData';
@@ -66,13 +66,16 @@ const OrderDetail = () => {
       <Layout>
         <div className="py-20 text-center">
           <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium text-foreground">Pedido não encontrado</p>
+          <p className="text-lg font-medium text-foreground">Pedido nÃ£o encontrado</p>
         </div>
       </Layout>
     );
   }
 
   const canCancel = order.status === 'agendado';
+  const productName = order.product?.name || 'Produto';
+  const productImage = order.product?.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400';
+  const productPrice = typeof order.product?.price === 'number' ? formatPrice(order.product.price) : 'Preço indisponível';
 
   return (
     <Layout>
@@ -95,11 +98,11 @@ const OrderDetail = () => {
           </div>
 
           <div className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-            <img src={order.product.imageUrl} alt={order.product.name} className="h-20 w-20 rounded-lg object-cover" />
+            <img src={productImage} alt={productName} className="h-20 w-20 rounded-lg object-cover" />
             <div>
-              <h3 className="font-semibold text-foreground">{order.product.name}</h3>
+              <h3 className="font-semibold text-foreground">{productName}</h3>
               <p className="text-sm text-muted-foreground">{statusLabels[order.status]}</p>
-              <p className="mt-1 font-display text-lg font-bold text-foreground">{formatPrice(order.product.price)}</p>
+              <p className="mt-1 font-display text-lg font-bold text-foreground">{productPrice}</p>
             </div>
           </div>
 
@@ -107,7 +110,7 @@ const OrderDetail = () => {
             <div className="flex items-start gap-3">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Endereço</p>
+                <p className="text-xs font-medium text-muted-foreground">EndereÃ§o</p>
                 <p className="text-sm text-foreground">{order.address}</p>
               </div>
             </div>
@@ -121,7 +124,7 @@ const OrderDetail = () => {
             <div className="flex items-start gap-3">
               <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Horário</p>
+                <p className="text-xs font-medium text-muted-foreground">HorÃ¡rio</p>
                 <p className="text-sm text-foreground">{order.scheduledTime}</p>
               </div>
             </div>
@@ -143,7 +146,7 @@ const OrderDetail = () => {
 
           {canCancel && (
             <Button variant="destructive" className="w-full" disabled>
-              Cancelar Pedido (indisponível)
+              Cancelar Pedido (indisponÃ­vel)
             </Button>
           )}
         </div>
@@ -153,5 +156,7 @@ const OrderDetail = () => {
 };
 
 export default OrderDetail;
+
+
 
 
