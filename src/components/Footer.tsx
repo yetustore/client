@@ -42,16 +42,6 @@ const Footer = () => (
           </ul>
         </div>
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-foreground">Venda no YetuStore</h4>
-          <ul className="space-y-2 text-xs text-muted-foreground">
-            <li>Comece a vender</li>
-            <li>Central do Vendedor</li>
-            <li>Seja um fornecedor verificado</li>
-            <li>Parcerias</li>
-            <li>App para fornecedores</li>
-          </ul>
-        </div>
-        <div className="space-y-3">
           <h4 className="text-sm font-semibold text-foreground">Saiba mais</h4>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li>Sobre a YetuStore</li>

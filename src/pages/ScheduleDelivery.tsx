@@ -419,13 +419,13 @@ const ScheduleDelivery = () => {
                 size="lg"
                 onClick={() => {
                   if (!date || !time) {
-                    toast.error('Selecione data e hor�rio');
+                    toast.error('Selecione data e horário');
                     return;
                   }
                   setStep(2);
                 }}
               >
-                Pr�xima etapa
+                Próxima etapa
               </Button>
             </div>
           )}
@@ -444,18 +444,18 @@ const ScheduleDelivery = () => {
                       setAddressQuery(e.target.value);
                       setSelectedPlace(null);
                     }}
-                    placeholder="Digite o endere�o"
+                    placeholder="Digite o endereço"
                     className="flex-1"
                   />
                   <Button type="button" variant="outline" onClick={handleUseCurrentLocation}>
                     <LocateFixed className="mr-2 h-4 w-4" />
-                    Usar localiza��o atual
+                    Usar localização atual
                   </Button>
                 </div>
                 {mapsError ? (
                   <p className="mt-1 text-xs text-destructive">{mapsError}</p>
                 ) : (
-                  <p className="mt-1 text-xs text-muted-foreground">Sugest�es apenas de Angola (opcional).</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Entregamos apenas em Angola .</p>
                 )}
                 {addressOptions.length > 0 && !selectedPlace && (
                   <div className="mt-2 rounded-lg border border-border bg-card shadow">
