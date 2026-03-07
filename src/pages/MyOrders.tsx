@@ -155,13 +155,6 @@ const MyOrders = () => {
                 );
               })}
             </div>
-                      <p className="mt-1 text-sm font-semibold text-foreground">{formatPrice(order.product.price)}</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
             <PaginationControls page={page} pageCount={pageCount} onPageChange={setPage} />
           </>
         ) : (
@@ -177,4 +170,3 @@ const MyOrders = () => {
 };
 
 export default MyOrders;
-
