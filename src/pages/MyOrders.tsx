@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { statusLabels, formatPrice } from '@/data/mockData';
 import { StatusBadge } from '@/components/OrderTimeline';
@@ -100,49 +100,60 @@ const MyOrders = () => {
         ) : filtered.length > 0 ? (
           <>
             <div className="space-y-3">
-              {paged.map((order, i) => (
-                <motion.div
-                  key={order.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                >
-                  <Link
-                    to={`/orders/${order.id}`}
-                    className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-elevated"
+              {paged.map((order, i) => {
+                const productName = order.product?.name ?? 'Produto';
+                const productImage =
+                  order.product?.imageUrl ??
+                  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400';
+                const productPrice =
+                  typeof order.product?.price === 'number'
+                    ? formatPrice(order.product.price)
+                    : 'Preço indisponível';
+
+                return (
+                  <motion.div
+                    key={order.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
                   >
-                    <img
-                      src={order.product.imageUrl}
-                      alt={order.product.name}
-                      className="h-16 w-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <h3 className="font-semibold text-foreground truncate">{order.product.name}</h3>
-                        <StatusBadge status={order.status} />
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {order.scheduledDate} às {order.scheduledTime}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {order.address}
-                        </span>
-                        {order.affiliateName && (
+                    <Link
+                      to={`/orders/${order.id}`}
+                      className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-elevated"
+                    >
+                      <img
+                        src={productImage}
+                        alt={productName}
+                        className="h-16 w-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-foreground truncate">{productName}</h3>
+                          <StatusBadge status={order.status} />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            Afiliado: {order.affiliateName}
+                            <Calendar className="h-3 w-3" />
+                            {order.scheduledDate} Ã s {order.scheduledTime}
                           </span>
-                        )}
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {order.address}
+                          </span>
+                          {order.affiliateName && (
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              Afiliado: {order.affiliateName}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm font-semibold text-foreground">{productPrice}</p>
                       </div>
-                      <p className="mt-1 text-sm font-semibold text-foreground">{formatPrice(order.product.price)}</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </motion.div>
-              ))}
+                      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </div>
             <PaginationControls page={page} pageCount={pageCount} onPageChange={setPage} />
           </>
@@ -150,7 +161,7 @@ const MyOrders = () => {
           <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 text-center">
             <ShoppingBag className="mb-3 h-10 w-10 text-muted-foreground" />
             <p className="text-lg font-medium text-foreground">Nenhum pedido encontrado</p>
-            <p className="text-sm text-muted-foreground">Seus pedidos aparecerão aqui</p>
+            <p className="text-sm text-muted-foreground">Seus pedidos aparecerÃ£o aqui</p>
           </div>
         )}
       </motion.div>
