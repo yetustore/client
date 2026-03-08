@@ -22,7 +22,7 @@ const FirstVisitLoading = () => (
       />
     </div>
     <div>
-      <p className="font-display text-2xl font-bold text-foreground">Bem-vindo � YetuStore</p>
+      <p className="font-display text-2xl font-bold text-foreground">Bem-vindo á YetuStore</p>
       <p className="mt-1 text-sm text-muted-foreground">Estamos preparando o seu acesso...</p>
     </div>
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

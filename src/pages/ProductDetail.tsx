@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getProductById, getCategories, createAffiliateLink } from '@/lib/api';
+import { getProductById, getCategories, createAffiliateLink, getProductShareUrl } from '@/lib/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -135,6 +135,17 @@ const ProductDetail = () => {
     }
   };
 
+  const handleCopyProductLink = async () => {
+    if (!product) return;
+    try {
+      const shareUrl = getProductShareUrl(product.id);
+      await navigator.clipboard?.writeText(shareUrl);
+      toast.success('Link do produto copiado!', { description: shareUrl });
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao copiar link do produto');
+    }
+  };
+
   const affiliateCode = searchParams.get('ref');
   const isAffiliateView = Boolean(affiliateCode);
   const scheduleUrl = affiliateCode
@@ -227,6 +238,14 @@ const ProductDetail = () => {
               >
                 <CalendarDays className="h-4 w-4" />
                 Agendar Entrega
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCopyProductLink}
+                className="flex-1 gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Partilhar Produto
               </Button>
               {isAuthenticated && !isAffiliateView && (
                 <Button

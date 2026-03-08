@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/products/(.*)", "destination": "/api/product-page?id=$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

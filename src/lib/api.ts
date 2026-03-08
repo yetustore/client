@@ -2,6 +2,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
 const ACCESS_KEY = 'yetustore_access';
 const REFRESH_KEY = 'yetustore_refresh';
 
+const PUBLIC_BACKEND_URL = API_URL.replace(/\/api\/v1\/?$/, '');
+const PUBLIC_SITE_URL = import.meta.env.VITE_SITE_URL || '';
+
 export const getAccessToken = () => localStorage.getItem(ACCESS_KEY) || '';
 export const getRefreshToken = () => localStorage.getItem(REFRESH_KEY) || '';
 
@@ -187,6 +190,13 @@ export const getProductById = async (id) => {
   return data.product;
 };
 
+export const getProductShareUrl = (productId) => {
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : (PUBLIC_SITE_URL || PUBLIC_BACKEND_URL);
+  return `${origin.replace(/\/+$/, '')}/products/${encodeURIComponent(productId)}`;
+};
+
 export const createOrder = async (payload) => {
   const data = await apiFetch('/orders', {
     method: 'POST',
@@ -263,4 +273,3 @@ export const logoutClient = async () => {
   }
   clearTokens();
 };
-
