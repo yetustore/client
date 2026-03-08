@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getProductById, getCategories, createAffiliateLink, getProductShareUrl, trackAffiliateClick } from '@/lib/api';
+import { getProductById, getCategories, createAffiliateLink, getProductShareUrl, resolveAffiliateCode, trackAffiliateClick } from '@/lib/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,12 +16,13 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [creatingLink, setCreatingLink] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [ignoreAffiliateCode, setIgnoreAffiliateCode] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const load = async () => {
@@ -72,7 +73,7 @@ const ProductDetail = () => {
   const currentMedia = media[mediaIndex];
   const showNav = media.length > 1;
   const affiliateCode = searchParams.get('ref');
-  const isAffiliateView = Boolean(affiliateCode);
+  const isAffiliateView = Boolean(affiliateCode) && !ignoreAffiliateCode;
 
   useEffect(() => {
     if (currentMedia?.type !== 'video') return;
@@ -92,9 +93,35 @@ const ProductDetail = () => {
   }, [currentMedia?.type, currentMedia?.url, mediaIndex]);
 
   useEffect(() => {
-    if (!affiliateCode) return;
-    trackAffiliateClick(affiliateCode);
-  }, [affiliateCode]);
+    setIgnoreAffiliateCode(false);
+    if (!affiliateCode || !id) return;
+
+    let cancelled = false;
+    const handleAffiliateCode = async () => {
+      if (user?.id) {
+        try {
+          const link = await resolveAffiliateCode(affiliateCode);
+          if (cancelled) return;
+          if (link.userId === user.id) {
+            setIgnoreAffiliateCode(true);
+            navigate(`/products/${id}`, { replace: true });
+            return;
+          }
+        } catch {
+          return;
+        }
+      }
+
+      if (!cancelled) {
+        trackAffiliateClick(affiliateCode);
+      }
+    };
+
+    handleAffiliateCode();
+    return () => {
+      cancelled = true;
+    };
+  }, [affiliateCode, id, navigate, user?.id]);
 
   if (loading) {
     return (
