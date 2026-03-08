@@ -161,7 +161,7 @@ const MyOrders = () => {
           <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 text-center">
             <ShoppingBag className="mb-3 h-10 w-10 text-muted-foreground" />
             <p className="text-lg font-medium text-foreground">Nenhum pedido encontrado</p>
-            <p className="text-sm text-muted-foreground">Seus pedidos aparecerÃ£o aqui</p>
+            <p className="text-sm text-muted-foreground">Seus pedidos aparecerão aqui</p>
           </div>
         )}
       </motion.div>

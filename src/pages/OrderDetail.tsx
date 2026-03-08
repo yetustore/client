@@ -1,15 +1,22 @@
-﻿import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { getMyOrders } from '@/lib/api';
-import { formatPrice, statusLabels } from '@/data/mockData';
-import OrderTimeline, { StatusBadge } from '@/components/OrderTimeline';
-import Layout from '@/components/Layout';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, MapPin, Calendar, Clock, Package, Users } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Order } from '@/types';
-import { onSocket } from '@/lib/socket';
+﻿import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getMyOrders } from "@/lib/api";
+import { formatPrice, statusLabels } from "@/data/mockData";
+import OrderTimeline, { StatusBadge } from "@/components/OrderTimeline";
+import Layout from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Clock,
+  Package,
+  Users,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Order } from "@/types";
+import { onSocket } from "@/lib/socket";
 
 const OrderDetail = () => {
   const { id } = useParams();
@@ -19,7 +26,7 @@ const OrderDetail = () => {
 
   const load = async () => {
     const orders = await getMyOrders();
-    const found = orders.find(o => o.id === id) || null;
+    const found = orders.find((o) => o.id === id) || null;
     setOrder(found);
   };
 
@@ -33,7 +40,7 @@ const OrderDetail = () => {
     };
     init();
 
-    const offOrders = onSocket('orders.updated', () => load());
+    const offOrders = onSocket("orders.updated", () => load());
     return () => offOrders();
   }, [id]);
 
@@ -66,20 +73,30 @@ const OrderDetail = () => {
       <Layout>
         <div className="py-20 text-center">
           <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium text-foreground">Pedido nÃ£o encontrado</p>
+          <p className="text-lg font-medium text-foreground">
+            Pedido não encontrado
+          </p>
         </div>
       </Layout>
     );
   }
 
-  const canCancel = order.status === 'agendado';
-  const productName = order.product?.name || 'Produto';
-  const productImage = order.product?.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400';
-  const productPrice = typeof order.product?.price === 'number' ? formatPrice(order.product.price) : 'Preço indisponível';
+  const canCancel = order.status === "agendado";
+  const productName = order.product?.name || "Produto";
+  const productImage =
+    order.product?.imageUrl ||
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400";
+  const productPrice =
+    typeof order.product?.price === "number"
+      ? formatPrice(order.product.price)
+      : "Preço indisponível";
 
   return (
     <Layout>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <button
           onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -91,18 +108,31 @@ const OrderDetail = () => {
         <div className="mx-auto max-w-2xl">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="font-display text-2xl font-bold text-foreground">Pedido #{order.id.slice(-4)}</h1>
-              <p className="text-sm text-muted-foreground">Criado em {new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+              <h1 className="font-display text-2xl font-bold text-foreground">
+                Pedido #{order.id.slice(-4)}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Criado em{" "}
+                {new Date(order.createdAt).toLocaleDateString("pt-BR")}
+              </p>
             </div>
             <StatusBadge status={order.status} />
           </div>
 
           <div className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-            <img src={productImage} alt={productName} className="h-20 w-20 rounded-lg object-cover" />
+            <img
+              src={productImage}
+              alt={productName}
+              className="h-20 w-20 rounded-lg object-cover"
+            />
             <div>
               <h3 className="font-semibold text-foreground">{productName}</h3>
-              <p className="text-sm text-muted-foreground">{statusLabels[order.status]}</p>
-              <p className="mt-1 font-display text-lg font-bold text-foreground">{productPrice}</p>
+              <p className="text-sm text-muted-foreground">
+                {statusLabels[order.status]}
+              </p>
+              <p className="mt-1 font-display text-lg font-bold text-foreground">
+                {productPrice}
+              </p>
             </div>
           </div>
 
@@ -110,21 +140,27 @@ const OrderDetail = () => {
             <div className="flex items-start gap-3">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground">EndereÃ§o</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Endereço
+                </p>
                 <p className="text-sm text-foreground">{order.address}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Data</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Data
+                </p>
                 <p className="text-sm text-foreground">{order.scheduledDate}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground">HorÃ¡rio</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Horário
+                </p>
                 <p className="text-sm text-foreground">{order.scheduledTime}</p>
               </div>
             </div>
@@ -134,21 +170,20 @@ const OrderDetail = () => {
             <div className="mb-6 rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="h-4 w-4" />
-                Afiliado: <span className="text-foreground font-medium">{order.affiliateName}</span>
+                Afiliado:{" "}
+                <span className="text-foreground font-medium">
+                  {order.affiliateName}
+                </span>
               </div>
             </div>
           )}
 
           <div className="mb-6 rounded-xl border border-border bg-card p-4">
-            <h3 className="mb-4 font-display text-base font-semibold text-foreground">Linha do Tempo</h3>
+            <h3 className="mb-4 font-display text-base font-semibold text-foreground">
+              Linha do Tempo
+            </h3>
             <OrderTimeline history={order.statusHistory} />
           </div>
-
-          {canCancel && (
-            <Button variant="destructive" className="w-full" disabled>
-              Cancelar Pedido (indisponÃ­vel)
-            </Button>
-          )}
         </div>
       </motion.div>
     </Layout>
@@ -156,7 +191,3 @@ const OrderDetail = () => {
 };
 
 export default OrderDetail;
-
-
-
-
