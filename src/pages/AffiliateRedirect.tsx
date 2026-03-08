@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { resolveAffiliateCode, trackAffiliateClick } from '@/lib/api';
+import { resolveAffiliateCode } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const AffiliateRedirect = () => {
@@ -15,7 +15,6 @@ const AffiliateRedirect = () => {
       if (!cleanCode) return;
       try {
         const link = await resolveAffiliateCode(cleanCode);
-        await trackAffiliateClick(cleanCode);
         navigate(`/products/${link.productId}?ref=${encodeURIComponent(cleanCode)}`, { replace: true });
       } catch {
         setMessage('Link de afiliado inválido.');

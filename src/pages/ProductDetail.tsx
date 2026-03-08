@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getProductById, getCategories, createAffiliateLink, getProductShareUrl } from '@/lib/api';
+import { getProductById, getCategories, createAffiliateLink, getProductShareUrl, trackAffiliateClick } from '@/lib/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -71,6 +71,8 @@ const ProductDetail = () => {
 
   const currentMedia = media[mediaIndex];
   const showNav = media.length > 1;
+  const affiliateCode = searchParams.get('ref');
+  const isAffiliateView = Boolean(affiliateCode);
 
   useEffect(() => {
     if (currentMedia?.type !== 'video') return;
@@ -88,6 +90,11 @@ const ProductDetail = () => {
       video.currentTime = 0;
     };
   }, [currentMedia?.type, currentMedia?.url, mediaIndex]);
+
+  useEffect(() => {
+    if (!affiliateCode) return;
+    trackAffiliateClick(affiliateCode);
+  }, [affiliateCode]);
 
   if (loading) {
     return (
@@ -146,8 +153,6 @@ const ProductDetail = () => {
     }
   };
 
-  const affiliateCode = searchParams.get('ref');
-  const isAffiliateView = Boolean(affiliateCode);
   const scheduleUrl = affiliateCode
     ? `/schedule/${product.id}?ref=${encodeURIComponent(affiliateCode)}`
     : `/schedule/${product.id}`;
