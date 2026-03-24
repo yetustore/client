@@ -2,7 +2,7 @@ import { Product, Order, AffiliateLink, User } from '@/types';
 
 export const mockUser: User = {
   id: 'user-1',
-  name: 'João Silva',
+  name: 'Joï¿½o Silva',
   email: 'joao@email.com',
   phone: '+244 923 456 789',
   emailVerified: true,
@@ -14,7 +14,7 @@ export const mockProducts: Product[] = [
   {
     id: 'prod-1',
     name: 'Smartphone Galaxy Ultra',
-    description: 'Smartphone de última geração com câmera de 200MP, tela AMOLED 6.8" e bateria de 5000mAh. Processador octa-core para máximo desempenho.',
+    description: 'Smartphone de ï¿½ltima geraï¿½ï¿½o com cï¿½mera de 200MP, tela AMOLED 6.8" e bateria de 5000mAh. Processador octa-core para mï¿½ximo desempenho.',
     price: 189900,
     currency: 'AOA',
     categories: ['cat-1'],
@@ -25,7 +25,7 @@ export const mockProducts: Product[] = [
   {
     id: 'prod-2',
     name: 'Notebook Pro 15"',
-    description: 'Notebook profissional com processador i7, 16GB RAM, SSD 512GB. Ideal para trabalho e multimídia.',
+    description: 'Notebook profissional com processador i7, 16GB RAM, SSD 512GB. Ideal para trabalho e multimï¿½dia.',
     price: 345000,
     currency: 'AOA',
     categories: ['cat-1'],
@@ -35,8 +35,8 @@ export const mockProducts: Product[] = [
   },
   {
     id: 'prod-3',
-    name: 'Sofá Moderno 3 Lugares',
-    description: 'Sofá elegante em tecido premium, estrutura em madeira maciça. Conforto e estilo para sua sala.',
+    name: 'Sofï¿½ Moderno 3 Lugares',
+    description: 'Sofï¿½ elegante em tecido premium, estrutura em madeira maciï¿½a. Conforto e estilo para sua sala.',
     price: 125000,
     currency: 'AOA',
     categories: ['cat-2'],
@@ -46,8 +46,8 @@ export const mockProducts: Product[] = [
   },
   {
     id: 'prod-4',
-    name: 'Tênis Running Pro',
-    description: 'Tênis esportivo com amortecimento avançado, sola em borracha e malha respirável.',
+    name: 'Tï¿½nis Running Pro',
+    description: 'Tï¿½nis esportivo com amortecimento avanï¿½ado, sola em borracha e malha respirï¿½vel.',
     price: 28500,
     currency: 'AOA',
     categories: ['cat-3'],
@@ -58,7 +58,7 @@ export const mockProducts: Product[] = [
   {
     id: 'prod-5',
     name: 'Kit Skincare Premium',
-    description: 'Kit completo de cuidados com a pele: limpeza, hidratação e proteção solar. Produtos naturais.',
+    description: 'Kit completo de cuidados com a pele: limpeza, hidrataï¿½ï¿½o e proteï¿½ï¿½o solar. Produtos naturais.',
     price: 15900,
     currency: 'AOA',
     categories: ['cat-4'],
@@ -69,7 +69,7 @@ export const mockProducts: Product[] = [
   {
     id: 'prod-6',
     name: 'Vestido Elegante',
-    description: 'Vestido midi em tecido fluido, perfeito para ocasiões especiais. Caimento impecável.',
+    description: 'Vestido midi em tecido fluido, perfeito para ocasiï¿½es especiais. Caimento impecï¿½vel.',
     price: 18700,
     currency: 'AOA',
     categories: ['cat-5'],
@@ -90,8 +90,8 @@ export const mockProducts: Product[] = [
   },
   {
     id: 'prod-8',
-    name: 'Luminária Inteligente',
-    description: 'Luminária LED com controle por app, 16 milhões de cores e integração com assistentes de voz.',
+    name: 'Luminï¿½ria Inteligente',
+    description: 'Luminï¿½ria LED com controle por app, 16 milhï¿½es de cores e integraï¿½ï¿½o com assistentes de voz.',
     price: 12500,
     currency: 'AOA',
     categories: ['cat-2'],
@@ -105,12 +105,20 @@ export const mockOrders: Order[] = [
   {
     id: 'order-1',
     userId: 'user-1',
-    productId: 'prod-1',
-    product: mockProducts[0],
+    items: [
+      {
+        productId: mockProducts[0].id,
+        product: mockProducts[0],
+        quantity: 1,
+        unitPrice: mockProducts[0].price,
+        totalPrice: mockProducts[0].price,
+      },
+    ],
+    totalAmount: mockProducts[0].price,
     status: 'comprado',
     scheduledDate: '2024-12-20',
     scheduledTime: '14:00',
-    address: 'Rua da Missão, 45, Luanda',
+    address: 'Rua da Missï¿½o, 45, Luanda',
     latitude: -8.839,
     longitude: 13.289,
     createdAt: '2024-12-18T10:00:00Z',
@@ -124,8 +132,16 @@ export const mockOrders: Order[] = [
   {
     id: 'order-2',
     userId: 'user-1',
-    productId: 'prod-3',
-    product: mockProducts[2],
+    items: [
+      {
+        productId: mockProducts[2].id,
+        product: mockProducts[2],
+        quantity: 1,
+        unitPrice: mockProducts[2].price,
+        totalPrice: mockProducts[2].price,
+      },
+    ],
+    totalAmount: mockProducts[2].price,
     status: 'em_progresso',
     scheduledDate: '2025-01-05',
     scheduledTime: '10:00',
@@ -142,8 +158,16 @@ export const mockOrders: Order[] = [
   {
     id: 'order-3',
     userId: 'user-1',
-    productId: 'prod-5',
-    product: mockProducts[4],
+    items: [
+      {
+        productId: mockProducts[4].id,
+        product: mockProducts[4],
+        quantity: 1,
+        unitPrice: mockProducts[4].price,
+        totalPrice: mockProducts[4].price,
+      },
+    ],
+    totalAmount: mockProducts[4].price,
     status: 'agendado',
     scheduledDate: '2025-02-25',
     scheduledTime: '16:00',
@@ -159,8 +183,16 @@ export const mockOrders: Order[] = [
   {
     id: 'order-4',
     userId: 'user-1',
-    productId: 'prod-4',
-    product: mockProducts[3],
+    items: [
+      {
+        productId: mockProducts[3].id,
+        product: mockProducts[3],
+        quantity: 1,
+        unitPrice: mockProducts[3].price,
+        totalPrice: mockProducts[3].price,
+      },
+    ],
+    totalAmount: mockProducts[3].price,
     status: 'cancelado',
     scheduledDate: '2024-11-15',
     scheduledTime: '09:00',
@@ -175,7 +207,6 @@ export const mockOrders: Order[] = [
     ],
   },
 ];
-
 export const mockAffiliateLinks: AffiliateLink[] = [
   {
     id: 'aff-1',

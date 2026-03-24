@@ -82,14 +82,9 @@ const OrderDetail = () => {
   }
 
   const canCancel = order.status === "agendado";
-  const productName = order.product?.name || "Produto";
-  const productImage =
-    order.product?.imageUrl ||
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400";
-  const productPrice =
-    typeof order.product?.price === "number"
-      ? formatPrice(order.product.price)
-      : "Preço indisponível";
+  const items = order.items || [];
+  const totalAmount = order.totalAmount || 0;
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <Layout>
@@ -119,21 +114,15 @@ const OrderDetail = () => {
             <StatusBadge status={order.status} />
           </div>
 
-          <div className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-            <img
-              src={productImage}
-              alt={productName}
-              className="h-20 w-20 rounded-lg object-cover"
-            />
+          <div className="mb-6 flex flex-col space-y-2 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div>
-              <h3 className="font-semibold text-foreground">{productName}</h3>
-              <p className="text-sm text-muted-foreground">
-                {statusLabels[order.status]}
+              <p className="text-xs font-medium text-muted-foreground">Resumo do pedido</p>
+              <p className="text-lg font-semibold text-foreground">
+                {totalItems} item{totalItems === 1 ? "" : "s"} agendado{totalItems === 1 ? "" : "s"}
               </p>
-              <p className="mt-1 font-display text-lg font-bold text-foreground">
-                {productPrice}
-              </p>
+              <p className="text-sm text-muted-foreground">{statusLabels[order.status]}</p>
             </div>
+            <p className="text-xl font-display font-bold text-foreground">{formatPrice(totalAmount)}</p>
           </div>
 
           <div className="mb-6 grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-3">
@@ -177,6 +166,38 @@ const OrderDetail = () => {
               </div>
             </div>
           )}
+
+          <div className="mb-6 rounded-xl border border-border bg-card p-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">Itens do pedido</h3>
+            <div className="space-y-3">
+              {items.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum produto vinculado ao pedido.</p>
+              ) : (
+                items.map(item => (
+                  <div key={item.productId} className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={item.product?.imageUrl || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100"}
+                        alt={item.product?.name || "Produto"}
+                        className="h-12 w-12 rounded-md object-cover"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{item.product?.name || "Produto"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Quantidade: {item.quantity} � {formatPrice(item.unitPrice)} cada
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground">{formatPrice(item.totalPrice)}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm font-semibold text-foreground">
+              <span>Total do pedido</span>
+              <span>{formatPrice(totalAmount)}</span>
+            </div>
+          </div>
 
           <div className="mb-6 rounded-xl border border-border bg-card p-4">
             <h3 className="mb-4 font-display text-base font-semibold text-foreground">

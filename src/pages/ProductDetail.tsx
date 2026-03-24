@@ -1,16 +1,17 @@
-import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
+﻿import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getProductById, getCategories, createAffiliateLink, getProductShareUrl, resolveAffiliateCode, trackAffiliateClick } from '@/lib/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Star, ArrowLeft, CalendarDays, Share2, Package, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, ArrowLeft, Package, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Category, Product } from '@/types';
 import { formatPrice } from '@/data/mockData';
 import { onSocket } from '@/lib/socket';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -20,10 +21,14 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creatingLink, setCreatingLink] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [ignoreAffiliateCode, setIgnoreAffiliateCode] = useState(false);
+  const [creatingLink, setCreatingLink] = useState(false);
+  const { addItem } = useCart();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const affiliateCode = searchParams.get('ref');
+  const isAffiliateView = Boolean(affiliateCode) && !ignoreAffiliateCode;
 
   const load = async () => {
     const [prod, cats] = await Promise.all([
@@ -56,42 +61,6 @@ const ProductDetail = () => {
     setMediaIndex(0);
   }, [product?.id]);
 
-  const categoryLabel = useMemo(() => {
-    if (!product) return '';
-    const names = product.categories.map(cid => categories.find(c => c.id === cid)?.name).filter(Boolean);
-    return names[0] || '';
-  }, [product, categories]);
-
-  const media = useMemo(() => {
-    if (!product) return [];
-    const list = (product.media && product.media.length > 0)
-      ? product.media
-      : (product.imageUrl ? [{ type: 'image' as const, url: product.imageUrl }] : []);
-    return list.filter(m => m.url);
-  }, [product]);
-
-  const currentMedia = media[mediaIndex];
-  const showNav = media.length > 1;
-  const affiliateCode = searchParams.get('ref');
-  const isAffiliateView = Boolean(affiliateCode) && !ignoreAffiliateCode;
-
-  useEffect(() => {
-    if (currentMedia?.type !== 'video') return;
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.currentTime = 0;
-    const playPromise = video.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(() => {});
-    }
-
-    return () => {
-      video.pause();
-      video.currentTime = 0;
-    };
-  }, [currentMedia?.type, currentMedia?.url, mediaIndex]);
-
   useEffect(() => {
     setIgnoreAffiliateCode(false);
     if (!affiliateCode || !id) return;
@@ -122,6 +91,61 @@ const ProductDetail = () => {
       cancelled = true;
     };
   }, [affiliateCode, id, navigate, user?.id]);
+
+  const categoryLabel = useMemo(() => {
+    if (!product) return '';
+    const names = product.categories
+      .map(cid => categories.find(c => c.id === cid)?.name)
+      .filter(Boolean);
+    return names[0] || '';
+  }, [product, categories]);
+
+  const media = useMemo(() => {
+    if (!product) return [];
+    const list = product.media && product.media.length > 0
+      ? product.media
+      : product.imageUrl
+        ? [{ type: 'image' as const, url: product.imageUrl }]
+        : [];
+    return list.filter(m => m.url);
+  }, [product]);
+
+  const currentMedia = media[mediaIndex];
+  const showNav = media.length > 1;
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addItem(product, 1);
+    toast.success('Produto adicionado ao carrinho');
+  };
+
+  const handleCopyProductLink = async () => {
+    if (!product) return;
+    try {
+      const shareUrl = getProductShareUrl(product.id);
+      await navigator.clipboard?.writeText(shareUrl);
+      toast.success('Link do produto copiado!', { description: shareUrl });
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao copiar link do produto');
+    }
+  };
+
+  const handleGenerateLink = async () => {
+    if (!product) return;
+    try {
+      setCreatingLink(true);
+      const link = await createAffiliateLink(product.id);
+      await navigator.clipboard?.writeText(link.url);
+      toast.success('Link de afiliado criado e copiado!', { description: link.url });
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao gerar link');
+    } finally {
+      setCreatingLink(false);
+    }
+  };
+
+  const goPrev = () => setMediaIndex(i => (i - 1 + media.length) % media.length);
+  const goNext = () => setMediaIndex(i => (i + 1) % media.length);
 
   if (loading) {
     return (
@@ -156,45 +180,6 @@ const ProductDetail = () => {
     );
   }
 
-  const handleGenerateLink = async () => {
-    try {
-      setCreatingLink(true);
-      const link = await createAffiliateLink(product.id);
-      await navigator.clipboard?.writeText(link.url);
-      toast.success('Link de afiliado criado e copiado!', { description: link.url });
-    } catch (err: any) {
-      toast.error(err?.message || 'Erro ao gerar link');
-    } finally {
-      setCreatingLink(false);
-    }
-  };
-
-  const handleCopyProductLink = async () => {
-    if (!product) return;
-    try {
-      const shareUrl = getProductShareUrl(product.id);
-      await navigator.clipboard?.writeText(shareUrl);
-      toast.success('Link do produto copiado!', { description: shareUrl });
-    } catch (err: any) {
-      toast.error(err?.message || 'Erro ao copiar link do produto');
-    }
-  };
-
-  const scheduleUrl = affiliateCode
-    ? `/schedule/${product.id}?ref=${encodeURIComponent(affiliateCode)}`
-    : `/schedule/${product.id}`;
-
-  const goPrev = () => setMediaIndex(i => (i - 1 + media.length) % media.length);
-  const goNext = () => setMediaIndex(i => (i + 1) % media.length);
-
-  const handleSchedule = () => {
-    if (!isAuthenticated) {
-      navigate(`/auth?redirect=${encodeURIComponent(scheduleUrl)}`);
-      return;
-    }
-    navigate(scheduleUrl);
-  };
-
   return (
     <Layout>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -220,7 +205,11 @@ const ProductDetail = () => {
                 loop
               />
             ) : (
-              <img src={currentMedia?.url || product.imageUrl} alt={product.name} className="aspect-square w-full object-contain bg-secondary" />
+              <img
+                src={currentMedia?.url || product.imageUrl}
+                alt={product.name}
+                className="aspect-square w-full object-contain bg-secondary"
+              />
             )}
 
             {showNav && (
@@ -263,33 +252,31 @@ const ProductDetail = () => {
             <p className="mb-6 leading-relaxed text-muted-foreground">{product.description}</p>
             <p className="mb-6 font-display text-3xl font-bold text-foreground">{formatPrice(product.price)}</p>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                onClick={handleSchedule}
-                className="flex-1 gap-2"
-              >
-                <CalendarDays className="h-4 w-4" />
-                Agendar Entrega
+            <div className="mb-4 flex flex-col gap-3">
+              <Button variant="outline" className="w-full" onClick={handleAddToCart}>
+                Adicionar ao carrinho
               </Button>
-              <Button
-                variant="outline"
-                onClick={handleCopyProductLink}
-                className="flex-1 gap-2"
-              >
-                <Share2 className="h-4 w-4" />
-                Partilhar Produto
-              </Button>
-              {isAuthenticated && !isAffiliateView && (
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   variant="outline"
-                  onClick={handleGenerateLink}
+                  onClick={handleCopyProductLink}
                   className="flex-1 gap-2"
-                  disabled={creatingLink}
                 >
                   <Share2 className="h-4 w-4" />
-                  {creatingLink ? 'Gerando...' : 'Gerar Link de Afiliado'}
+                  Partilhar Produto
                 </Button>
-              )}
+                {isAuthenticated && !isAffiliateView && (
+                  <Button
+                    variant="outline"
+                    onClick={handleGenerateLink}
+                    className="flex-1 gap-2"
+                    disabled={creatingLink}
+                  >
+                    <Share2 className="h-4 w-4" />
+                    {creatingLink ? 'Gerando...' : 'Gerar Link de Afiliado'}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -299,13 +286,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-
-
-
-
-
-
-
-
-
-

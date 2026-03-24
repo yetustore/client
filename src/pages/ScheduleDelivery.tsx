@@ -1,21 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { getProductById, createOrder } from '@/lib/api';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { createOrder } from '@/lib/api';
 import { formatPrice } from '@/data/mockData';
 import Layout from '@/components/Layout';
+import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, MapPin, Clock, CheckCircle2, ArrowLeft, LocateFixed } from 'lucide-react';
+import { CalendarIcon, MapPin, Clock, CheckCircle2, ArrowLeft, LocateFixed, ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Product, Order } from '@/types';
+import { Order } from '@/types';
 
 const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 const DEFAULT_CENTER = { lat: -8.839, lng: 13.289 }; // Luanda
@@ -40,11 +40,8 @@ const loadMapsScript = (apiKey: string) => new Promise<void>((resolve, reject) =
 });
 
 const ScheduleDelivery = () => {
-  const { productId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<1 | 2>(1);
 
   const [date, setDate] = useState<Date>();
@@ -59,6 +56,8 @@ const ScheduleDelivery = () => {
 
   const [confirmed, setConfirmed] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
+
+  const { items, totalAmount, totalItems, clearCart } = useCart();
 
   const autocompleteRef = useRef<any>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -194,19 +193,7 @@ const ScheduleDelivery = () => {
     );
   }, [addressQuery, mapsReady, selectedPlace]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        if (productId) {
-          const prod = await getProductById(productId);
-          setProduct(prod);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [productId]);
+  
 
   const handleSelectAddress = (option: { description: string; placeId: string }) => {
     setSelectedPlace(option);
@@ -244,13 +231,13 @@ const ScheduleDelivery = () => {
     );
   };
 
-  const handleConfirm = async () => {
+    const handleConfirm = async () => {
     if (!date || !time) {
-      toast.error('Selecione data e horário');
+      toast.error('Selecione data e hor�rio');
       return;
     }
     if (!mapsError && !coords) {
-      toast.error('Defina a localização no mapa');
+      toast.error('Defina a localiza��o no mapa');
       return;
     }
 
@@ -260,14 +247,18 @@ const ScheduleDelivery = () => {
       if (finalAddress) setAddressQuery(finalAddress);
     }
     if (!finalAddress) {
-      toast.error('Informe o endereço');
+      toast.error('Informe o endere�o');
+      return;
+    }
+    if (items.length === 0) {
+      toast.error('Adicione ao menos um produto ao carrinho');
       return;
     }
 
     try {
       const affiliateCode = searchParams.get('ref') || undefined;
       const created = await createOrder({
-        productId: product?.id,
+        items: items.map(item => ({ productId: item.productId, quantity: item.quantity })),
         scheduledDate: format(date, 'yyyy-MM-dd'),
         scheduledTime: time,
         address: finalAddress,
@@ -276,35 +267,22 @@ const ScheduleDelivery = () => {
       });
       setOrder(created);
       setConfirmed(true);
+      clearCart();
       toast.success('Entrega agendada com sucesso!');
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao agendar entrega');
     }
   };
 
-  if (loading) {
+  if (items.length === 0 && !confirmed) {
     return (
       <Layout>
-        <div className="mx-auto max-w-2xl space-y-4">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-8 w-2/3" />
-          <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-            <Skeleton className="h-16 w-16 rounded-lg" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          </div>
-          <Skeleton className="h-48 w-full rounded-xl" />
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-20 text-center">
+          <ShoppingCart className="h-12 w-12 text-muted-foreground" />
+          <p className="text-lg font-semibold text-foreground">Seu carrinho est� vazio</p>
+          <p className="text-sm text-muted-foreground">Adicione produtos ao carrinho antes de agendar a entrega.</p>
+          <Link to="/" className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary">Voltar ao cat�logo</Link>
         </div>
-      </Layout>
-    );
-  }
-
-  if (!product) {
-    return (
-      <Layout>
-        <p className="py-20 text-center text-muted-foreground">Produto não encontrado</p>
       </Layout>
     );
   }
@@ -321,9 +299,12 @@ const ScheduleDelivery = () => {
             <CheckCircle2 className="h-8 w-8 text-success" />
           </div>
           <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Pedido Agendado!</h2>
-          <p className="mb-6 text-muted-foreground">
-            Seu pedido de <strong>{product.name}</strong> foi agendado para{' '}
-            {date && format(date, "dd 'de' MMMM", { locale: pt })} às {time}.
+          <p className="mb-4 text-muted-foreground">
+            Seu pedido com <strong>{order?.items.length || 0} itens</strong> foi agendado para{' '}
+            {date && format(date, "dd 'de' MMMM", { locale: pt })} �s {time}.
+          </p>
+          <p className="mb-3 text-sm font-semibold text-foreground">
+            Total: {formatPrice(order?.totalAmount ?? totalAmount)}
           </p>
           {order && (
             <p className="mb-6 text-xs text-muted-foreground">Pedido: {order.id}</p>
@@ -352,11 +333,30 @@ const ScheduleDelivery = () => {
           <h1 className="mb-1 font-display text-2xl font-bold text-foreground">Agendar Entrega</h1>
           <p className="mb-6 text-muted-foreground">Escolha o endereço, data e horário para a entrega</p>
 
-          <div className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-            <img src={product.imageUrl} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
-            <div className="flex-1">
-              <p className="font-semibold text-foreground">{product.name}</p>
-              <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
+          <div className="mb-6 rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-muted-foreground">Itens do carrinho</p>
+              <span className="text-xs text-muted-foreground">Total: {totalItems} itens</span>
+            </div>
+            <div className="space-y-3">
+              {items.map(item => (
+                <div key={item.productId} className="flex items-center gap-3">
+                  <img
+                    src={item.product.imageUrl}
+                    alt={item.product.name}
+                    className="h-12 w-12 rounded-lg object-cover"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">{item.product.name}</p>
+                    <p className="text-xs text-muted-foreground">{item.quantity} � {formatPrice(item.product.price)}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground">{formatPrice(item.product.price * item.quantity)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Total do carrinho</span>
+              <span className="font-semibold text-foreground">{formatPrice(totalAmount)}</span>
             </div>
           </div>
 

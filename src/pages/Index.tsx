@@ -1,8 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
 import Layout from '@/components/Layout';
 import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { getCategories, getProducts } from '@/lib/api';
@@ -29,7 +29,8 @@ const ProductCardSkeleton = () => (
 
 const Index = () => {
   const isMobile = useIsMobile();
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [categoryId, setCategoryId] = useState('all');
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -38,6 +39,10 @@ const Index = () => {
   const pageSize = isMobile ? 8 : 15;
   const skeletonCount = pageSize;
 
+  useEffect(() => {
+    const query = searchParams.get('search') ?? '';
+    setSearch(query);
+  }, [searchParams]);
   const load = async () => {
     const [cats, prods] = await Promise.all([getCategories(), getProducts()]);
     setCategories(cats);
@@ -67,9 +72,9 @@ const Index = () => {
     setPage(1);
   }, [search, categoryId, pageSize]);
 
+  const normalizedSearch = search.trim().toLowerCase();
   const filtered = products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.description.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !normalizedSearch || p.name.toLowerCase().includes(normalizedSearch) || p.description.toLowerCase().includes(normalizedSearch);
     const matchCategory = categoryId === 'all' || p.categories.includes(categoryId);
     return matchSearch && matchCategory;
   });
@@ -93,18 +98,6 @@ const Index = () => {
         <div className="mb-6">
           <h1 className="font-display text-3xl font-bold text-foreground">Catálogo</h1>
           <p className="mt-1 text-muted-foreground">Explore nossos produtos e agende sua entrega</p>
-        </div>
-
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar produtos..."
-              className="pl-10"
-            />
-          </div>
         </div>
 
         <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
@@ -162,9 +155,3 @@ const Index = () => {
 };
 
 export default Index;
-
-
-
-
-
-
