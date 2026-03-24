@@ -35,13 +35,27 @@ export interface Product {
   stock: number;
 }
 
+export interface CartItem {
+  productId: string;
+  product: Product;
+  quantity: number;
+}
+
 export type OrderStatus = 'agendado' | 'cancelado' | 'em_progresso' | 'comprado';
+
+export interface OrderItem {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  product?: Product;
+}
 
 export interface Order {
   id: string;
   userId: string;
-  productId: string;
-  product: Product;
+  items: OrderItem[];
+  totalAmount: number;
   status: OrderStatus;
   scheduledDate: string;
   scheduledTime: string;

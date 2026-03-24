@@ -101,16 +101,14 @@ const MyOrders = () => {
           <>
             <div className="space-y-3">
               {paged.map((order, i) => {
-                const productName = order.product?.name ?? 'Produto';
+                const primaryItem = order.items?.[0];
+                const productName = primaryItem?.product?.name || 'Produtos';
                 const productImage =
-                  order.product?.imageUrl ??
+                  primaryItem?.product?.imageUrl ||
                   'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400';
-                const productPrice =
-                  typeof order.product?.price === 'number'
-                    ? formatPrice(order.product.price)
-                    : 'Preço indisponível';
-
-                return (
+                const productPrice = formatPrice(order.totalAmount || 0);
+                const extraItems = order.items.length > 1 ? ' +' + (order.items.length - 1) + ' itens' : '';
+return (
                   <motion.div
                     key={order.id}
                     initial={{ opacity: 0, y: 10 }}
@@ -128,7 +126,10 @@ const MyOrders = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="mb-1 flex items-center justify-between gap-2">
-                          <h3 className="font-semibold text-foreground truncate">{productName}</h3>
+                          <h3 className="font-semibold text-foreground truncate">
+                          {productName}
+                          {extraItems && <span className="ml-1 text-[11px] font-semibold text-muted-foreground">{extraItems}</span>}
+                        </h3>
                           <StatusBadge status={order.status} />
                         </div>
                         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
