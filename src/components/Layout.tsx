@@ -213,6 +213,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {location.pathname === '/' && (
+          <div className="md:hidden border-t border-border bg-card/60 px-4 py-3">
+            <form onSubmit={handleSearchSubmit} className="relative flex w-full items-center">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={event => setSearchTerm(event.target.value)}
+                placeholder="Buscar produtos..."
+                className="w-full rounded-xl border border-border/80 pl-10 pr-3 text-sm"
+              />
+            </form>
+          </div>
+        )}
       </header>
 
       {/* Cart drawer */}
