@@ -76,10 +76,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <button
                 type="button"
                 onClick={() => setCartOpen(true)}
-                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary/70"
+                className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary/70"
                 aria-label="Abrir carrinho"
               >
                 <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="pointer-events-none absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                    {totalItems}
+                  </span>
+                )}
               </button>
               <Link
                 to="/auth"
@@ -120,10 +125,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <button
                   type="button"
                   onClick={() => setCartOpen(true)}
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary/70"
+                  className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary/70"
                   aria-label="Abrir carrinho"
                 >
                   <ShoppingCart className="h-5 w-5" />
+                  {totalItems > 0 && (
+                    <span className="pointer-events-none absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      {totalItems}
+                    </span>
+                  )}
                 </button>
                 <div className="hidden items-center gap-2 md:flex">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
@@ -169,6 +179,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 >
                   <ShoppingCart className="h-4 w-4" />
                   Carrinho
+                  {totalItems > 0 && (
+                    <span className="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      {totalItems}
+                    </span>
+                  )}
                 </button>
                 {navItems.map(item => {
                   const Icon = item.icon;

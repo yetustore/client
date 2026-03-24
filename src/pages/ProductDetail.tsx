@@ -1,4 +1,4 @@
-﻿import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getProductById, getCategories, createAffiliateLink, getProductShareUrl, resolveAffiliateCode, trackAffiliateClick } from '@/lib/api';
 import Layout from '@/components/Layout';
@@ -117,6 +117,15 @@ const ProductDetail = () => {
     if (!product) return;
     addItem(product, 1);
     toast.success('Produto adicionado ao carrinho');
+  };
+
+  const handleSchedulePurchase = () => {
+    if (!product) return;
+    navigate('/schedule', {
+      state: {
+        directItems: [{ productId: product.id, product, quantity: 1 }],
+      },
+    });
   };
 
   const handleCopyProductLink = async () => {
@@ -246,7 +255,7 @@ const ProductDetail = () => {
                 <Star className="h-4 w-4 fill-current" />
                 <span className="text-sm font-semibold">{product.rating}</span>
               </div>
-              <span className="text-sm text-muted-foreground">·</span>
+              <span className="text-sm text-muted-foreground">.</span>
               <span className="text-sm text-muted-foreground">{product.stock} em estoque</span>
             </div>
             <p className="mb-6 leading-relaxed text-muted-foreground">{product.description}</p>
@@ -255,6 +264,9 @@ const ProductDetail = () => {
             <div className="mb-4 flex flex-col gap-3">
               <Button variant="outline" className="w-full" onClick={handleAddToCart}>
                 Adicionar ao carrinho
+              </Button>
+              <Button className="w-full" onClick={handleSchedulePurchase}>
+                Agendar compra
               </Button>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
@@ -286,3 +298,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+

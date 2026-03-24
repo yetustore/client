@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { createOrder } from '@/lib/api';
 import { formatPrice } from '@/data/mockData';
 import Layout from '@/components/Layout';
@@ -15,7 +15,7 @@ import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Order } from '@/types';
+import { CartItem, Order } from '@/types';
 
 const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 const DEFAULT_CENTER = { lat: -8.839, lng: 13.289 }; // Luanda
@@ -58,6 +58,16 @@ const ScheduleDelivery = () => {
   const [order, setOrder] = useState<Order | null>(null);
 
   const { items, totalAmount, totalItems, clearCart } = useCart();
+  const location = useLocation();
+  const directItemsFromState = (location.state as { directItems?: CartItem[] } | undefined)?.directItems ?? null;
+  const hasDirectItems = Boolean(directItemsFromState?.length);
+  const scheduledItems = useMemo<CartItem[]>(() => (hasDirectItems ? directItemsFromState! : items), [hasDirectItems, directItemsFromState, items]);
+  const displayTotalAmount = hasDirectItems
+    ? directItemsFromState!.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+    : totalAmount;
+  const displayTotalItems = hasDirectItems
+    ? directItemsFromState!.reduce((sum, item) => sum + item.quantity, 0)
+    : totalItems;
 
   const autocompleteRef = useRef<any>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -250,7 +260,7 @@ const ScheduleDelivery = () => {
       toast.error('Informe o endere�o');
       return;
     }
-    if (items.length === 0) {
+    if (scheduledItems.length === 0) {
       toast.error('Adicione ao menos um produto ao carrinho');
       return;
     }
@@ -258,7 +268,7 @@ const ScheduleDelivery = () => {
     try {
       const affiliateCode = searchParams.get('ref') || undefined;
       const created = await createOrder({
-        items: items.map(item => ({ productId: item.productId, quantity: item.quantity })),
+        items: scheduledItems.map(item => ({ productId: item.productId, quantity: item.quantity })),
         scheduledDate: format(date, 'yyyy-MM-dd'),
         scheduledTime: time,
         address: finalAddress,
@@ -274,7 +284,7 @@ const ScheduleDelivery = () => {
     }
   };
 
-  if (items.length === 0 && !confirmed) {
+  if (scheduledItems.length === 0 && !confirmed) {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-20 text-center">
@@ -304,7 +314,7 @@ const ScheduleDelivery = () => {
             {date && format(date, "dd 'de' MMMM", { locale: pt })} �s {time}.
           </p>
           <p className="mb-3 text-sm font-semibold text-foreground">
-            Total: {formatPrice(order?.totalAmount ?? totalAmount)}
+            Total: {formatPrice(order?.totalAmount ?? displayTotalAmount)}
           </p>
           {order && (
             <p className="mb-6 text-xs text-muted-foreground">Pedido: {order.id}</p>
@@ -336,10 +346,10 @@ const ScheduleDelivery = () => {
           <div className="mb-6 rounded-xl border border-border bg-card p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-muted-foreground">Itens do carrinho</p>
-              <span className="text-xs text-muted-foreground">Total: {totalItems} itens</span>
+              <span className="text-xs text-muted-foreground">Total: {displayTotalItems} itens</span>
             </div>
             <div className="space-y-3">
-              {items.map(item => (
+              {scheduledItems.map(item => (
                 <div key={item.productId} className="flex items-center gap-3">
                   <img
                     src={item.product.imageUrl}
@@ -356,7 +366,7 @@ const ScheduleDelivery = () => {
             </div>
             <div className="mt-4 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Total do carrinho</span>
-              <span className="font-semibold text-foreground">{formatPrice(totalAmount)}</span>
+              <span className="font-semibold text-foreground">{formatPrice(displayTotalAmount)}</span>
             </div>
           </div>
 
@@ -494,5 +504,4 @@ const ScheduleDelivery = () => {
 };
 
 export default ScheduleDelivery;
-
 
