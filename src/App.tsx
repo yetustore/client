@@ -20,6 +20,7 @@ import OrderDetail from "./pages/OrderDetail";
 import Affiliates from "./pages/Affiliates";
 import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
+import Invite from "./pages/Invite";
 import First from "@/components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const AppShell = () => {
           <Route path="/verify" element={<VerifyAccount />} />
           <Route path="/r/:code" element={<AffiliateRedirect />} />
           <Route path="/" element={<Index />} />
+          <Route path="/invite" element={<Invite />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route
