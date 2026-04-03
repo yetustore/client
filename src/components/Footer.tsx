@@ -1,4 +1,4 @@
-﻿import { Facebook, Instagram, Linkedin, Youtube } from 'lucide-react';
+﻿import { Facebook, Instagram, Linkedin } from 'lucide-react';
 
 const Footer = () => (
   <footer className="border-t border-border bg-card/60">
@@ -52,23 +52,44 @@ const Footer = () => (
           <div className="pt-2">
             <p className="text-xs font-semibold text-foreground">Fique conectado</p>
             <div className="mt-2 flex items-center gap-3 overflow-x-auto">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#1877F2]">
-                <Facebook className="h-6 w-6" aria-label="Facebook" />
-              </span>
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#E4405F]">
-                <Instagram className="h-6 w-6" aria-label="Instagram" />
-              </span>
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#0A66C2]">
-                <Linkedin className="h-6 w-6" aria-label="LinkedIn" />
-              </span>
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#FF0000]">
-                <Youtube className="h-6 w-6" aria-label="YouTube" />
-              </span>
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#000000]">
-                <svg viewBox="0 0 24 24" aria-label="TikTok" className="h-6 w-6 fill-current">
+              <a
+                href="https://www.facebook.com/Yetustor"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#1877F2]"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-6 w-6" />
+              </a>
+              <a
+                href="https://www.instagram.com/yetu_store_oficial/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#E4405F]"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-6 w-6" />
+              </a>
+              <a
+                href="https://www.linkedin.com/company/yetu-store"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#0A66C2]"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-6 w-6" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@yetu_store?_r=1&_t=ZS-94ZwzVl9X68"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-[#000000]"
+                aria-label="TikTok"
+              >
+                <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
                   <path d="M16.7 5.3a4.5 4.5 0 0 0-2.6-.8v8.1a2.4 2.4 0 1 1-2.1-2.4V7.6a6 6 0 1 0 4.2 5.7V8.9c1.1.8 2.4 1.3 3.8 1.3V7.6c-1.2 0-2.4-.4-3.3-1.1Z" />
                 </svg>
-              </span>
+              </a>
             </div>
           </div>
         </div>

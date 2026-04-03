@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
 import Layout from '@/components/Layout';
-import { Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { getCategories, getProducts } from '@/lib/api';
@@ -32,6 +32,9 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [categoryId, setCategoryId] = useState('all');
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,19 @@ const Index = () => {
     setCategories(cats);
     setProducts(prods);
   };
+
+  const updateScrollButtons = useCallback(() => {
+    const container = categoriesRef.current;
+    if (!container) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      return;
+    }
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -69,6 +85,22 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    updateScrollButtons();
+    const container = categoriesRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.addEventListener('scroll', updateScrollButtons, { passive: true });
+    window.addEventListener('resize', updateScrollButtons);
+
+    return () => {
+      container.removeEventListener('scroll', updateScrollButtons);
+      window.removeEventListener('resize', updateScrollButtons);
+    };
+  }, [updateScrollButtons]);
+
+  useEffect(() => {
     setPage(1);
   }, [search, categoryId, pageSize]);
 
@@ -83,6 +115,10 @@ const Index = () => {
   useEffect(() => {
     setPage(p => Math.min(p, pageCount));
   }, [pageCount]);
+
+  useEffect(() => {
+    updateScrollButtons();
+  }, [categories, updateScrollButtons]);
 
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
   const showSkeleton = loading && products.length === 0;
@@ -100,30 +136,65 @@ const Index = () => {
           <p className="mt-1 text-muted-foreground">Explore nossos produtos e agende sua entrega</p>
         </div>
 
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-          <button
-            onClick={() => setCategoryId('all')}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              categoryId === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            }`}
+        <div className="mb-6 relative">
+          <div
+            ref={categoriesRef}
+            className="flex gap-2 overflow-x-auto pb-2 pr-2 pl-2 scroll-smooth scrollbar-hide md:pr-12 md:pl-3"
           >
-            Todos
-          </button>
-          {categories.map(cat => (
             <button
-              key={cat.id}
-              onClick={() => setCategoryId(cat.id)}
+              onClick={() => setCategoryId('all')}
               className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                categoryId === cat.id
+                categoryId === 'all'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
               }`}
             >
-              {cat.name}
+              Todos
             </button>
-          ))}
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setCategoryId(cat.id)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  categoryId === cat.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+          {canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => {
+                const el = categoriesRef.current;
+                if (!el) return;
+                el.scrollBy({ left: -el.clientWidth, behavior: 'smooth' });
+              }}
+              className="hidden absolute -left-2 top-1/2 z-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow transition-colors hover:border-primary hover:text-foreground md:flex"
+              aria-label="Navegar categorias para esquerda"
+              style={{ height: '48px', width: '48px' }}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+          {canScrollRight && (
+            <button
+              type="button"
+              onClick={() => {
+                const el = categoriesRef.current;
+                if (!el) return;
+                el.scrollBy({ left: el.clientWidth, behavior: 'smooth' });
+              }}
+              className="hidden absolute -right-2 top-1/2 z-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow transition-colors hover:border-primary hover:text-foreground md:flex"
+              aria-label="Navegar categorias para direita"
+              style={{ height: '48px', width: '48px' }}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {showSkeleton ? (

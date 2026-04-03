@@ -12,20 +12,23 @@ import { initGoogleButton } from "@/lib/google";
 const FIRST_VISIT_KEY = "yetustore-first-visit";
 
 const FirstVisitLoading = () => (
-  <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
-    <div className="relative">
-      <div className="absolute -inset-6 rounded-full bg-primary/10 blur-2xl" />
-      <img
-        src="/logo.png"
-        alt="YetuStore"
-        className="relative h-36 w-36 rounded-full border border-primary/20 bg-white object-cover shadow-elevated animate-float"
-      />
+  <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
+    {/* Texto */}
+    <div className="space-y-1">
+      <p className="font-display text-xl sm:text-2xl font-semibold text-foreground">
+        Bem-vindo
+      </p>
+
+      <p className="text-sm text-muted-foreground">
+        Estamos preparando o seu acesso...
+      </p>
     </div>
-    <div>
-      <p className="font-display text-2xl font-bold text-foreground">Bem-vindo á YetuStore</p>
-      <p className="mt-1 text-sm text-muted-foreground">Estamos preparando o seu acesso...</p>
+
+    {/* Loader */}
+    <div className="mt-6 flex items-center justify-center">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
     </div>
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+
   </div>
 );
 
@@ -133,16 +136,13 @@ const Auth = () => {
     <div className="flex min-h-screen">
       <div className="hidden w-1/2 items-center justify-center gradient-hero lg:flex">
         <div className="max-w-md px-8 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-primary-foreground/10 p-2 shadow-elevated">
+          <div className="mx-auto mb-6 flex  items-center justify-center rounded-2xl p-2">
             <img
-              src="/logo.png"
+              src="/logoRB.png"
               alt="YetuStore"
               className="h-full w-full rounded-xl object-cover"
             />
           </div>
-          <h1 className="mb-4 font-display text-4xl font-bold text-primary-foreground">
-            YetuStore
-          </h1>
           <p className="text-lg text-primary-foreground/80">
             Sua plataforma de compras com entrega agendada e programa de
             afiliados.
@@ -160,7 +160,7 @@ const Auth = () => {
             <div className="mb-4 flex items-center justify-center gap-2">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 p-1 shadow-card">
                 <img
-                  src="/logo.png"
+                  src="/logoRB.png"
                   alt="YetuStore"
                   className="h-full w-full rounded-md object-cover"
                 />
