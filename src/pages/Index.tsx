@@ -1,9 +1,12 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+﻿import { FormEvent, useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import ProductCard from '@/components/ProductCard';
 import Layout from '@/components/Layout';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { getCategories, getProducts } from '@/lib/api';
 import { Category, Product } from '@/types';
@@ -29,7 +32,8 @@ const ProductCardSkeleton = () => (
 
 const Index = () => {
   const isMobile = useIsMobile();
-  const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [categoryId, setCategoryId] = useState('all');
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -50,6 +54,21 @@ const Index = () => {
     const [cats, prods] = await Promise.all([getCategories(), getProducts()]);
     setCategories(cats);
     setProducts(prods);
+  };
+
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = search.trim();
+    const params = new URLSearchParams(searchParams);
+
+    if (query) {
+      params.set('search', query);
+    } else {
+      params.delete('search');
+    }
+
+    setSearchParams(params);
   };
 
   const updateScrollButtons = useCallback(() => {
@@ -135,6 +154,38 @@ const Index = () => {
           <h1 className="font-display text-3xl font-bold text-foreground">Catálogo</h1>
           <p className="mt-1 text-muted-foreground">Explore nossos produtos e agende sua entrega</p>
         </div>
+
+        {!isAuthenticated && (
+          <div className="mb-6 rounded-2xl border border-border bg-card/70 px-4 py-4 shadow-sm sm:px-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">Comece a buscar seus produtos</p>
+                <p className="text-xs text-muted-foreground">
+                  Pesquise pelo catálogo antes de entrar na sua conta.
+                </p>
+              </div>
+              <Button asChild className="w-full sm:w-auto">
+                <Link to="/auth?mode=login">Entrar</Link>
+              </Button>
+            </div>
+
+            <form onSubmit={handleSearchSubmit} className="mt-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Pesquisar produtos..."
+                  className="pl-10"
+                />
+                <button type="submit" className="sr-only">
+                  Buscar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
 
         <div className="mb-6 relative">
           <div
