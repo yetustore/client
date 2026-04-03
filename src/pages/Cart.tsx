@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/data/mockData';
 import { ShoppingCart } from 'lucide-react';
+import { loadAffiliateRef } from '@/lib/affiliate';
 
 const Cart = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { items, totalAmount, totalItems, updateQuantity, removeItem, clearCart } = useCart();
-  const ref = searchParams.get('ref');
+  const storedRef = loadAffiliateRef();
+  const ref = searchParams.get('ref') || storedRef;
   const scheduleUrl = ref ? `/schedule?ref=${encodeURIComponent(ref)}` : '/schedule';
 
   return (

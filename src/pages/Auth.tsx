@@ -13,29 +13,25 @@ const FIRST_VISIT_KEY = "yetustore-first-visit";
 
 const FirstVisitLoading = () => (
   <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-    {/* Texto */}
     <div className="space-y-1">
       <p className="font-display text-xl sm:text-2xl font-semibold text-foreground">
         Bem-vindo
       </p>
-
       <p className="text-sm text-muted-foreground">
         Estamos preparando o seu acesso...
       </p>
     </div>
 
-    {/* Loader */}
     <div className="mt-6 flex items-center justify-center">
       <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
     </div>
-
   </div>
 );
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">(
-    searchParams.get("mode") === "signup" ? "signup" : "login",
+    searchParams.get("mode") === "signup" ? "signup" : "login"
   );
   const [loading, setLoading] = useState(false);
   const [showFirstVisit, setShowFirstVisit] = useState(false);
@@ -86,7 +82,7 @@ const Auth = () => {
           (msg) => {
             if (!mounted) return;
             toast.error(msg);
-          },
+          }
         );
         if (mounted) setGoogleReady(true);
       } catch (err: any) {
@@ -136,11 +132,11 @@ const Auth = () => {
     <div className="flex min-h-screen">
       <div className="hidden w-1/2 items-center justify-center gradient-hero lg:flex">
         <div className="max-w-md px-8 text-center">
-          <div className="mx-auto mb-6 flex  items-center justify-center rounded-2xl p-2">
+          <div className="mx-auto mb-6 flex items-center justify-center rounded-2xl p-2">
             <img
               src="/logoRB.png"
               alt="YetuStore"
-              className="h-full w-full rounded-xl object-cover"
+              className="relative rounded-xl object-cover"
             />
           </div>
           <p className="text-lg text-primary-foreground/80">
@@ -150,24 +146,21 @@ const Auth = () => {
         </div>
       </div>
 
+      {/* Lado direito: formulário */}
       <div className="flex w-full items-center justify-center bg-background px-4 lg:w-1/2">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md"
         >
-          <div className="mb-8 lg:hidden">
-            <div className="mb-4 flex items-center justify-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 p-1 shadow-card">
-                <img
-                  src="/logoRB.png"
-                  alt="YetuStore"
-                  className="h-full w-full rounded-md object-cover"
-                />
-              </div>
-              <span className="font-display text-2xl font-bold text-foreground">
-                YetuStore
-              </span>
+          {/* Logotipo mobile */}
+          <div className="mb-8 flex items-center justify-center lg:hidden">
+            <div className="flex h-24 w-29 items-center justify-center rounded-lg p-1">
+              <img
+                src="/logo.png"
+                alt="YetuStore"
+                className="h-full w-full object-contain"
+              />
             </div>
           </div>
 
@@ -303,8 +296,8 @@ const Auth = () => {
               {loading
                 ? "Aguarde..."
                 : mode === "login"
-                  ? "Entrar"
-                  : "Criar conta"}
+                ? "Entrar"
+                : "Criar conta"}
             </Button>
           </form>
 

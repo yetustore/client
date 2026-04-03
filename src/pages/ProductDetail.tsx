@@ -12,6 +12,7 @@ import { formatPrice } from '@/data/mockData';
 import { onSocket } from '@/lib/socket';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { saveAffiliateRef, clearAffiliateRef } from '@/lib/affiliate';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -72,17 +73,20 @@ const ProductDetail = () => {
           const link = await resolveAffiliateCode(affiliateCode);
           if (cancelled) return;
           if (link.userId === user.id) {
+            clearAffiliateRef();
             setIgnoreAffiliateCode(true);
             navigate(`/products/${id}`, { replace: true });
             return;
           }
         } catch {
+          clearAffiliateRef();
           return;
         }
       }
 
       if (!cancelled) {
         trackAffiliateClick(affiliateCode);
+        saveAffiliateRef(affiliateCode);
       }
     };
 

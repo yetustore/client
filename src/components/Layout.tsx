@@ -43,6 +43,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     navigate('/auth');
   };
 
+  const closeCart = () => setCartOpen(false);
+  const closeMobileMenu = () => setMobileOpen(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -176,6 +179,132 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         {children}
       </main>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.nav
+            key="mobile-menu"
+            className="fixed inset-x-0 top-16 z-40 border-t border-border bg-card/95 px-4 py-6 shadow-lg md:hidden"
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -10, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+          >
+            <div className="space-y-3">
+              {navItems.map(item => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => closeMobileMenu()}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
+                    location.pathname === item.path
+                      ? 'bg-secondary/70 text-foreground'
+                      : 'text-muted-foreground hover:bg-secondary/40'
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileMenu();
+                  closeCart();
+                  setCartOpen(true);
+                }}
+                className="flex w-full items-center justify-between rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary/40"
+              >
+                Ver Carrinho <ShoppingCart className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  handleLogout();
+                }}
+                className="w-full rounded-lg border border-border px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10"
+              >
+                Sair
+              </button>
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {cartOpen && (
+          <>
+            <motion.div
+              key="cart-backdrop"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeCart}
+            />
+            <motion.aside
+              key="cart-panel"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-md border-l border-border bg-card shadow-xl"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween' }}
+            >
+              <div className="flex items-center justify-between border-b border-border px-4 py-4">
+                <h2 className="text-lg font-semibold text-foreground">Carrinho</h2>
+                <button onClick={closeCart} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-4 p-4">
+                {items.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-secondary/60 p-6 text-center">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Seu carrinho está vazio</p>
+                    <Button variant="outline" onClick={() => { closeCart(); navigate('/'); }}>
+                      Ver catálogo
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {items.map(item => (
+                      <div key={item.productId} className="flex flex-col gap-2 rounded-xl border border-border p-4 sm:flex-row sm:items-center">
+                        <img src={item.product.imageUrl} alt={item.product.name} className="h-16 w-16 rounded-lg object-cover" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-foreground">{item.product.name}</p>
+                          <p className="text-xs text-muted-foreground">{formatPrice(item.product.price)}</p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(item.productId, item.quantity - 1)} disabled={item.quantity <= 1}>
+                              -
+                            </Button>
+                            <span className="text-sm font-semibold">{item.quantity}</span>
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(item.productId, item.quantity + 1)} disabled={item.quantity >= item.product.stock}>
+                              +
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-destructive" onClick={() => removeItem(item.productId)}>
+                              Remover
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="sticky bottom-0 border-t border-border bg-card/90 px-4 py-4">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Total ({totalItems} itens)</span>
+                  <span className="font-semibold text-foreground">{formatPrice(totalAmount)}</span>
+                </div>
+                <Button className="mt-4 w-full" size="lg" onClick={() => { closeCart(); navigate('/cart'); }}>
+                  Finalizar compra
+                </Button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

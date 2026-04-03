@@ -148,3 +148,30 @@
     display: none;
   }
 }
+
+@layer base {
+  [data-sonner-toast] {
+    position: relative;
+    overflow: hidden;
+  }
+
+  [data-sonner-toast]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 3px;
+    background: hsl(142 65% 35%);
+    animation: toast-progress var(--toast-duration, 4000ms) linear forwards;
+  }
+
+  [data-sonner-toast] [data-icon] {
+    display: none !important;
+  }
+}
+
+@keyframes toast-progress {
+  to {
+    width: 0;
+  }
+}
