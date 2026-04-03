@@ -120,7 +120,7 @@ const Affiliates = () => {
               { label: 'Links Gerados', value: totalLinks.toString(), icon: Link2, color: 'text-primary' },
               { label: 'Cliques Totais', value: totalClicks.toString(), icon: MousePointerClick, color: 'text-info' },
               { label: 'Pedidos Gerados', value: totalOrders.toString(), icon: ShoppingBag, color: 'text-warning' },
-              { label: 'Ganhos (5%)', value: formatPrice(summary.totalEarned), icon: Wallet, color: 'text-success' },
+              { label: 'Ganhos', value: formatPrice(summary.totalEarned), icon: Wallet, color: 'text-success' },
               { label: 'Sacado', value: formatPrice(summary.totalWithdrawn), icon: Wallet, color: 'text-muted-foreground' },
             ].map((stat, i) => {
               const Icon = stat.icon;

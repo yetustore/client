@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { CartItem, Order } from '@/types';
+import { loadAffiliateRef, saveAffiliateRef } from '@/lib/affiliate';
 
 const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 const DEFAULT_CENTER = { lat: -8.839, lng: 13.289 }; // Luanda
@@ -41,6 +42,12 @@ const loadMapsScript = (apiKey: string) => new Promise<void>((resolve, reject) =
 
 const ScheduleDelivery = () => {
   const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const affiliateCode = searchParams.get('ref');
+    if (affiliateCode) {
+      saveAffiliateRef(affiliateCode);
+    }
+  }, [searchParams]);
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -266,7 +273,7 @@ const ScheduleDelivery = () => {
     }
 
     try {
-      const affiliateCode = searchParams.get('ref') || undefined;
+      const affiliateCode = searchParams.get('ref') || loadAffiliateRef() || undefined;
       const created = await createOrder({
         items: scheduledItems.map(item => ({ productId: item.productId, quantity: item.quantity })),
         scheduledDate: format(date, 'yyyy-MM-dd'),

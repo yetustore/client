@@ -33,6 +33,7 @@ export interface Product {
   media?: ProductMedia[];
   rating: number;
   stock: number;
+  affiliatePercent?: number;
 }
 
 export interface CartItem {
@@ -49,6 +50,7 @@ export interface OrderItem {
   unitPrice: number;
   totalPrice: number;
   product?: Product;
+  affiliatePercent?: number;
 }
 
 export interface Order {
