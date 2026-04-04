@@ -34,8 +34,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [cartOpen, setCartOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const showProductSearch = location.pathname === "/";
-  const showMobileSearch = isAuthenticated && showProductSearch;
+  const showMobileSearch = isAuthenticated && location.pathname === "/";
 
   React.useEffect(() => {
     if (location.pathname === "/") {
@@ -73,20 +72,18 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             />
           </Link>
 
-          {showProductSearch && (
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative hidden flex-1 max-w-xs items-center md:flex"
-            >
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar produtos..."
-                className="pl-10"
-              />
-            </form>
-          )}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative hidden flex-1 max-w-xs items-center md:flex"
+          >
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Buscar produtos..."
+              className="pl-10"
+            />
+          </form>
 
           {!isAuthenticated ? (
             <div className="flex items-center gap-1 sm:gap-2">
