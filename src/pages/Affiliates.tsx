@@ -108,7 +108,7 @@ const Affiliates = () => {
             to="/affiliates/payouts"
             className="rounded-lg border border-border px-4 py-2 text-sm font-semibold"
           >
-            Histórico de Saques
+            Histórico
           </Link>
         </div>
 
