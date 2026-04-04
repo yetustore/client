@@ -62,7 +62,7 @@ const Invite = () => (
         <p className="text-muted-foreground leading-relaxed">
           Vamos apresentar a YetuStore em funcionamento, simular encomendas
           em tempo real e mostrar como a plataforma resolve problemas reais
-          do mercado. Depois disso, abrimos espaço para conversa, troca de ideias
+          do mercado. Depois disso, abriremos espaço para conversa, troca de ideias
           e networking.
         </p>
       </section>
