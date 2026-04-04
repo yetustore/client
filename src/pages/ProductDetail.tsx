@@ -118,18 +118,22 @@ const ProductDetail = () => {
   const showNav = media.length > 1;
 
   const handleAddToCart = () => {
-    if (!product) return;
-    addItem(product, 1);
-    toast.success('Produto adicionado ao carrinho');
+    // if (!product) return;
+    // addItem(product, 1);
+    // toast.success('Produto adicionado ao carrinho');
+
+    toast.success("Essa função estará disponivel depois do dia 18 de abril de 2026")
   };
 
   const handleSchedulePurchase = () => {
-    if (!product) return;
-    navigate('/schedule', {
-      state: {
-        directItems: [{ productId: product.id, product, quantity: 1 }],
-      },
-    });
+    // if (!product) return;
+    // navigate('/schedule', {
+    //   state: {
+    //     directItems: [{ productId: product.id, product, quantity: 1 }],
+    //   },
+    // });
+
+      toast.success("Essa função estará disponivel depois do dia 18 de abril de 2026")
   };
 
   const handleCopyProductLink = async () => {
@@ -144,17 +148,18 @@ const ProductDetail = () => {
   };
 
   const handleGenerateLink = async () => {
-    if (!product) return;
-    try {
-      setCreatingLink(true);
-      const link = await createAffiliateLink(product.id);
-      await navigator.clipboard?.writeText(link.url);
-      toast.success('Link de afiliado criado e copiado!', { description: link.url });
-    } catch (err: any) {
-      toast.error(err?.message || 'Erro ao gerar link');
-    } finally {
-      setCreatingLink(false);
-    }
+    // if (!product) return;
+    // try {
+    //   setCreatingLink(true);
+    //   const link = await createAffiliateLink(product.id);
+    //   await navigator.clipboard?.writeText(link.url);
+    //   toast.success('Link de afiliado criado e copiado!', { description: link.url });
+    // } catch (err: any) {
+    //   toast.error(err?.message || 'Erro ao gerar link');
+    // } finally {
+    //   setCreatingLink(false);
+    // }
+      toast.success("Essa função estará disponivel depois do dia 18 de abril de 2026")
   };
 
   const goPrev = () => setMediaIndex(i => (i - 1 + media.length) % media.length);
