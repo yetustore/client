@@ -4,7 +4,6 @@ import { getMyOrders } from "@/lib/api";
 import { formatPrice, statusLabels } from "@/data/mockData";
 import OrderTimeline, { StatusBadge } from "@/components/OrderTimeline";
 import Layout from "@/components/Layout";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft,
@@ -81,7 +80,6 @@ const OrderDetail = () => {
     );
   }
 
-  const canCancel = order.status === "agendado";
   const items = order.items || [];
   const totalAmount = order.totalAmount || 0;
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);

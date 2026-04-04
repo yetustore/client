@@ -141,7 +141,7 @@ const ProductDetail = () => {
     try {
       const shareUrl = getProductShareUrl(product.id);
       await navigator.clipboard?.writeText(shareUrl);
-      toast.success('Link do produto copiado!', { description: shareUrl });
+      toast.success('Link do produto copiado!');
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao copiar link do produto');
     }
@@ -153,7 +153,7 @@ const ProductDetail = () => {
     //   setCreatingLink(true);
     //   const link = await createAffiliateLink(product.id);
     //   await navigator.clipboard?.writeText(link.url);
-    //   toast.success('Link de afiliado criado e copiado!', { description: link.url });
+    //   toast.success('Link de afiliado criado e copiado!');
     // } catch (err: any) {
     //   toast.error(err?.message || 'Erro ao gerar link');
     // } finally {
