@@ -122,7 +122,7 @@ const ProductDetail = () => {
     // addItem(product, 1);
     // toast.success('Produto adicionado ao carrinho');
 
-    toast.success("Essa função estará disponivel depois do dia 18 de abril de 2026")
+    toast.success("Essa função estará disponivel no dia 18 de abril de 2026")
   };
 
   const handleSchedulePurchase = () => {
@@ -133,7 +133,7 @@ const ProductDetail = () => {
     //   },
     // });
 
-      toast.success("Essa função estará disponivel depois do dia 18 de abril de 2026")
+      toast.success("Essa função estará disponivel no dia 18 de abril de 2026")
   };
 
   const handleCopyProductLink = async () => {
@@ -159,7 +159,7 @@ const ProductDetail = () => {
     // } finally {
     //   setCreatingLink(false);
     // }
-      toast.success("Essa função estará disponivel depois do dia 18 de abril de 2026")
+      toast.success("Essa função estará disponivel no dia 18 de abril de 2026")
   };
 
   const goPrev = () => setMediaIndex(i => (i - 1 + media.length) % media.length);
