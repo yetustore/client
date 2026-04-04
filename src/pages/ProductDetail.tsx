@@ -258,7 +258,7 @@ const ProductDetail = () => {
                 {categoryLabel}
               </span>
             )}
-            <h1 className="mb-2 font-display text-3xl font-bold text-foreground">{product.name}</h1>
+            <h1 className="mb-2 font-display text-2xl font-bold text-foreground">{product.name}</h1>
             <div className="mb-4 flex items-center gap-2">
               <div className="flex items-center gap-1 text-accent">
                 <Star className="h-4 w-4 fill-current" />
@@ -268,7 +268,7 @@ const ProductDetail = () => {
               <span className="text-sm text-muted-foreground">{product.stock} em estoque</span>
             </div>
             <p className="mb-6 leading-relaxed text-muted-foreground">{product.description}</p>
-            <p className="mb-6 font-display text-3xl font-bold text-foreground">{formatPrice(product.price)}</p>
+            <p className="mb-6 font-display text-2xl font-bold text-foreground">{formatPrice(product.price)}</p>
 
             <div className="mb-4 flex flex-col gap-3">
               <Button variant="outline" className="w-full" onClick={handleAddToCart}>
