@@ -31,7 +31,7 @@ const FirstVisitLoading = () => (
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">(
-    searchParams.get("mode") === "signup" ? "signup" : "login"
+    searchParams.get("mode") === "signup" ? "signup" : "login",
   );
   const [loading, setLoading] = useState(false);
   const [showFirstVisit, setShowFirstVisit] = useState(false);
@@ -71,10 +71,10 @@ const Auth = () => {
             setLoading(true);
             try {
               await loginWithGoogle(token);
-              toast.success("Login com Google realizado!");
+              toast.success("Bem-vindo de volta!");
               navigate(redirectTo);
             } catch (err: any) {
-              toast.error(err?.message || "Erro ao autenticar com Google");
+              toast.error("Erro ao autenticar com Google, tente novamente");
             } finally {
               setLoading(false);
             }
@@ -82,13 +82,13 @@ const Auth = () => {
           (msg) => {
             if (!mounted) return;
             toast.error(msg);
-          }
+          },
         );
         if (mounted) setGoogleReady(true);
       } catch (err: any) {
         if (mounted) {
           setGoogleReady(false);
-          toast.error(err?.message || "Erro ao inicializar Google");
+          toast.error("Erro ao inicializar Google");
         }
       }
     };
@@ -120,7 +120,7 @@ const Auth = () => {
         navigate("/verify");
       }
     } catch {
-      toast.error("Erro ao autenticar");
+      toast.error("Email ou senha inválidos");
     } finally {
       setLoading(false);
     }
@@ -173,9 +173,12 @@ const Auth = () => {
               : "Preencha seus dados para começar"}
           </p>
 
-          <div className="mb-4 flex w-full justify-center">
-            <div ref={googleBtnRef} />
-          </div>
+          {googleReady && (
+            <div className="mb-4 flex w-full justify-center">
+              <div ref={googleBtnRef} />
+            </div>
+          )}
+
           {!googleReady && (
             <div className="flex items-center justify-center py-4">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#BF046B] border-t-transparent"></div>
@@ -296,8 +299,8 @@ const Auth = () => {
               {loading
                 ? "Aguarde..."
                 : mode === "login"
-                ? "Entrar"
-                : "Criar conta"}
+                  ? "Entrar"
+                  : "Criar conta"}
             </Button>
           </form>
 
