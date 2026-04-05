@@ -60,7 +60,7 @@ const VerifyAccount = () => {
     setLoading(true);
     try {
       await verifyPhone(phoneCode);
-      toast.success('Telefone verificado! Bem-vindo ao YetuStore!');
+      toast.success('Bem-vindo ao YetuStore!');
       navigate('/');
     } catch (err: any) {
       toast.error(err?.message || 'Código inválido. Tente novamente.');
@@ -144,7 +144,8 @@ const VerifyAccount = () => {
               </div>
               <h2 className="mb-2 font-display text-xl font-bold text-foreground">Verifique seu email</h2>
               <p className="mb-6 text-sm text-muted-foreground">
-                Enviamos um código de 6 dígitos para{' '}
+                Enviamos um código de 6 dígitos para {' '}  
+                <span className="font-medium text-foreground">{user?.email}</span>
               </p>
 
               <div className="mb-6 flex justify-center">
