@@ -172,12 +172,10 @@ const Auth = () => {
               ? "Acesse sua conta para continuar"
               : "Preencha seus dados para começar"}
           </p>
-
-          {googleReady && (
+          
             <div className="mb-4 flex w-full justify-center">
               <div ref={googleBtnRef} />
             </div>
-          )}
 
           {!googleReady && (
             <div className="flex items-center justify-center py-4">
