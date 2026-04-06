@@ -14,6 +14,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { saveAffiliateRef, clearAffiliateRef } from '@/lib/affiliate';
 
+const formatKwanza = (value: number) =>
+  new Intl.NumberFormat('pt-AO', {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+  }).format(value);
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -198,6 +204,12 @@ const ProductDetail = () => {
     );
   }
 
+  const affiliateRewardAmount = Math.round(((product.affiliatePercent ?? 0) * product.price) / 100);
+  const hasAffiliateReward = (product.affiliatePercent ?? 0) > 0;
+  const affiliateButtonLabel = hasAffiliateReward
+    ? `Ganhe ${formatKwanza(affiliateRewardAmount)} kwanzas`
+    : 'Gerar Link de Afiliado';
+
   return (
     <Layout>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -294,7 +306,7 @@ const ProductDetail = () => {
                     disabled={creatingLink}
                   >
                     <Share2 className="h-4 w-4" />
-                    {creatingLink ? 'Gerando...' : 'Gerar Link de Afiliado'}
+                    {creatingLink ? 'Gerando...' : affiliateButtonLabel}
                   </Button>
                 )}
               </div>
