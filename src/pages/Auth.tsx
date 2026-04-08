@@ -74,7 +74,7 @@ const Auth = () => {
               toast.success("Bem-vindo de volta!");
               navigate(redirectTo);
             } catch (err: any) {
-              toast.error("Erro ao autenticar com Google, tente novamente");
+              toast.error(err?.message || "Erro ao autenticar com Google, tente novamente");
             } finally {
               setLoading(false);
             }
@@ -119,8 +119,11 @@ const Auth = () => {
         toast.success("Conta criada! Verifique seu email.");
         navigate("/verify");
       }
-    } catch {
-      toast.error("Email ou senha inválidos");
+    } catch (err: any) {
+      const message = err?.message || (mode === "login"
+        ? "Email ou senha inválidos"
+        : "Erro ao criar conta");
+      toast.error(message);
     } finally {
       setLoading(false);
     }
