@@ -5,6 +5,25 @@ const REFRESH_KEY = 'yetustore_refresh';
 const PUBLIC_BACKEND_URL = API_URL.replace(/\/api\/v1\/?$/, '');
 const PUBLIC_SITE_URL = import.meta.env.VITE_SITE_URL || '';
 
+const getApiErrorMessage = (data: any) => {
+  if (typeof data === 'string') return data;
+  if (!data) return undefined;
+  if (typeof data.error === 'string' && data.error.trim()) return data.error;
+  if (typeof data.message === 'string' && data.message.trim()) return data.message;
+  if (Array.isArray(data.errors) && data.errors.length > 0) {
+    return data.errors
+      .map((error: any) => (typeof error === 'string' ? error : error?.message || JSON.stringify(error)))
+      .join(', ');
+  }
+  if (typeof data.errors === 'object') {
+    return Object.values(data.errors)
+      .flat()
+      .map((error: any) => (typeof error === 'string' ? error : error?.message || JSON.stringify(error)))
+      .join(', ');
+  }
+  return undefined;
+};
+
 export const getAccessToken = () => localStorage.getItem(ACCESS_KEY) || '';
 export const getRefreshToken = () => localStorage.getItem(REFRESH_KEY) || '';
 
@@ -25,7 +44,8 @@ export const apiFetch = async (path, options = {}) => {
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    const err = new Error(data.error || 'Request failed');
+    const message = getApiErrorMessage(data) || 'Request failed';
+    const err = new Error(message);
     err.status = res.status;
     throw err;
   }
@@ -54,7 +74,7 @@ export const loginClient = async (email, password) => {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || 'Login failed');
+    throw new Error(getApiErrorMessage(data) || 'Login failed');
   }
   const data = await res.json();
   setTokens(data.accessToken, data.refreshToken);
@@ -69,7 +89,7 @@ export const registerClient = async (payload) => {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || 'Register failed');
+    throw new Error(getApiErrorMessage(data) || 'Register failed');
   }
   const data = await res.json();
   setTokens(data.accessToken, data.refreshToken);
@@ -84,7 +104,7 @@ export const loginWithGoogle = async (idToken) => {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || 'Google login failed');
+    throw new Error(getApiErrorMessage(data) || 'Google login failed');
   }
   const data = await res.json();
   setTokens(data.accessToken, data.refreshToken);
@@ -156,7 +176,7 @@ export const requestPasswordReset = async (email, channel) => {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || 'Erro ao enviar c�digo');
+    throw new Error(getApiErrorMessage(data) || 'Erro ao enviar código');
   }
   return res.json();
 };
@@ -169,7 +189,7 @@ export const confirmPasswordReset = async (email, code, newPassword) => {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || 'Erro ao atualizar senha');
+    throw new Error(getApiErrorMessage(data) || 'Erro ao atualizar senha');
   }
   return res.json();
 };

@@ -155,17 +155,23 @@ const ProductDetail = () => {
 
   const handleGenerateLink = async () => {
     // if (!product) return;
+
     // try {
     //   setCreatingLink(true);
     //   const link = await createAffiliateLink(product.id);
-    //   await navigator.clipboard?.writeText(link.url);
-    //   toast.success('Link de afiliado criado e copiado!');
+
+    //   if (link?.url) {
+    //     await navigator.clipboard?.writeText(link.url);
+    //     toast.success('Link de afiliado criado e copiado!');
+    //   } else {
+    //     toast.success('Link de afiliado criado com sucesso!');
+    //   }
     // } catch (err: any) {
-    //   toast.error(err?.message || 'Erro ao gerar link');
+    //   toast.error(err?.message || 'Erro ao gerar link de afiliado');
     // } finally {
     //   setCreatingLink(false);
     // }
-      toast.success("Essa função estará disponivel no dia 18 de abril de 2026")
+       toast.success("Essa função estará disponivel no dia 18 de abril de 2026")
   };
 
   const goPrev = () => setMediaIndex(i => (i - 1 + media.length) % media.length);
@@ -205,10 +211,9 @@ const ProductDetail = () => {
   }
 
   const affiliateRewardAmount = Math.round(((product.affiliatePercent ?? 0) * product.price) / 100);
-  const hasAffiliateReward = (product.affiliatePercent ?? 0) > 0;
-  const affiliateButtonLabel = hasAffiliateReward
-    ? `Ganhe ${formatKwanza(affiliateRewardAmount)} kwanzas`
-    : 'Gerar Link de Afiliado';
+  const hasAffiliateReward = affiliateRewardAmount > 0;
+  const affiliateButtonLabel = `Ganhe ${formatKwanza(affiliateRewardAmount)} kwanzas`;
+  const showAffiliateRewardButton = isAuthenticated && !isAffiliateView && hasAffiliateReward;
 
   return (
     <Layout>
@@ -298,7 +303,7 @@ const ProductDetail = () => {
                   <Share2 className="h-4 w-4" />
                   Partilhar Produto
                 </Button>
-                {isAuthenticated && !isAffiliateView && (
+                {showAffiliateRewardButton && (
                   <Button
                     variant="outline"
                     onClick={handleGenerateLink}
