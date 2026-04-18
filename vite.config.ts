@@ -11,6 +11,9 @@ export default defineConfig(() => ({
       overlay: false,
     },
   },
+  preview: {
+    allowedHosts: ["yetustoretest.onrender.com"],
+  },
   plugins: [react()],
   resolve: {
     alias: {
