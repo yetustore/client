@@ -15,6 +15,8 @@ import PaginationControls from '@/components/PaginationControls';
 
 const PAGE_SIZE = 5;
 
+const normalizePhone = (phone: string) => phone.replace(/\s+/g, '').trim();
+
 const PayoutSkeleton = () => (
   <div className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-3">
     <div className="space-y-2">
@@ -80,7 +82,7 @@ const Profile = () => {
   const handleSave = async () => {
     if (!user) return;
     const nameChanged = name.trim() && name.trim() !== user.name;
-    const phoneChanged = phone.trim() !== (user.phone || '');
+    const phoneChanged = normalizePhone(phone) !== normalizePhone(user.phone || '');
 
     if (!nameChanged && !phoneChanged) {
       setEditing(false);
@@ -93,10 +95,11 @@ const Profile = () => {
         await updateProfile({ name: name.trim() });
       }
       if (phoneChanged) {
-        if (phone.trim().length < 7) {
+        const normalizedPhone = normalizePhone(phone);
+        if (normalizedPhone.length < 7) {
           toast.error('Telefone inválido');
         } else {
-          await setPhone(phone.trim());
+          await setPhone(normalizedPhone);
           toast.success('Telefone atualizado. Código enviado para verificação.');
         }
       }
