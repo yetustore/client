@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Package, Mail, Phone, ArrowRight, RefreshCw } from 'lucide-react';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 type Step = 'email' | 'phone';
 
 const normalizePhone = (phone: string) => phone.replace(/\s+/g, '').trim();
+const getAutoSendKey = (userId: string, step: Step) => `yetustore-auto-send:${userId}:${step}`;
 
 const VerifyAccount = () => {
   const [step, setStep] = useState<Step>('email');
@@ -21,7 +22,6 @@ const VerifyAccount = () => {
   const [resendTimer, setResendTimer] = useState(0);
   const { user, isAuthenticated, verifyEmail, verifyPhone, resendEmail, resendPhone, setPhone } = useAuth();
   const navigate = useNavigate();
-  const autoSentRef = useRef({ email: false, phone: false });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -43,26 +43,31 @@ const VerifyAccount = () => {
   }, [resendTimer]);
 
   useEffect(() => {
-    if (!user) {
-      autoSentRef.current = { email: false, phone: false };
+    if (!user?.id) {
       return;
     }
 
-    if (!user.emailVerified && step === 'email' && !autoSentRef.current.email) {
-      autoSentRef.current.email = true;
+    const key = getAutoSendKey(user.id, step);
+    if (sessionStorage.getItem(key)) {
+      return;
+    }
+
+    if (!user.emailVerified && step === 'email') {
+      sessionStorage.setItem(key, '1');
       void resendEmail()
         .then(() => setResendTimer(60))
         .catch(() => {
-          autoSentRef.current.email = false;
+          sessionStorage.removeItem(key);
         });
+      return;
     }
 
-    if (!user.phoneVerified && step === 'phone' && user.phone && !autoSentRef.current.phone) {
-      autoSentRef.current.phone = true;
+    if (!user.phoneVerified && step === 'phone' && user.phone) {
+      sessionStorage.setItem(key, '1');
       void resendPhone()
         .then(() => setResendTimer(60))
         .catch(() => {
-          autoSentRef.current.phone = false;
+          sessionStorage.removeItem(key);
         });
     }
   }, [step, user, resendEmail, resendPhone]);
@@ -72,6 +77,9 @@ const VerifyAccount = () => {
     setLoading(true);
     try {
       await verifyEmail(emailCode);
+      if (user?.id) {
+        sessionStorage.removeItem(getAutoSendKey(user.id, 'email'));
+      }
       toast.success('Email verificado com sucesso!');
       setStep('phone');
       setResendTimer(0);
@@ -88,6 +96,9 @@ const VerifyAccount = () => {
     setLoading(true);
     try {
       await verifyPhone(phoneCode);
+      if (user?.id) {
+        sessionStorage.removeItem(getAutoSendKey(user.id, 'phone'));
+      }
       toast.success('Bem-vindo ao YetuStore!');
       navigate('/');
     } catch (err: any) {
@@ -120,7 +131,6 @@ const VerifyAccount = () => {
     setLoading(true);
     try {
       await setPhone(normalizePhone(phoneInput));
-      autoSentRef.current.phone = true;
       toast.success('Código enviado por SMS!');
       setResendTimer(60);
       setPhoneCode('');
