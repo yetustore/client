@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Package, Mail, Phone, ArrowRight, RefreshCw } from 'lucide-react';
@@ -10,15 +10,18 @@ import { toast } from 'sonner';
 
 type Step = 'email' | 'phone';
 
+const normalizePhone = (phone: string) => phone.replace(/\s+/g, '').trim();
+
 const VerifyAccount = () => {
   const [step, setStep] = useState<Step>('email');
   const [emailCode, setEmailCode] = useState('');
   const [phoneCode, setPhoneCode] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [resendTimer, setResendTimer] = useState(60);
+  const [resendTimer, setResendTimer] = useState(0);
   const { user, isAuthenticated, verifyEmail, verifyPhone, resendEmail, resendPhone, setPhone } = useAuth();
   const navigate = useNavigate();
+  const autoSentRef = useRef({ email: false, phone: false });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -39,6 +42,31 @@ const VerifyAccount = () => {
     }
   }, [resendTimer]);
 
+  useEffect(() => {
+    if (!user) {
+      autoSentRef.current = { email: false, phone: false };
+      return;
+    }
+
+    if (!user.emailVerified && step === 'email' && !autoSentRef.current.email) {
+      autoSentRef.current.email = true;
+      void resendEmail()
+        .then(() => setResendTimer(60))
+        .catch(() => {
+          autoSentRef.current.email = false;
+        });
+    }
+
+    if (!user.phoneVerified && step === 'phone' && user.phone && !autoSentRef.current.phone) {
+      autoSentRef.current.phone = true;
+      void resendPhone()
+        .then(() => setResendTimer(60))
+        .catch(() => {
+          autoSentRef.current.phone = false;
+        });
+    }
+  }, [step, user, resendEmail, resendPhone]);
+
   const handleVerifyEmail = async () => {
     if (emailCode.length !== 6) return;
     setLoading(true);
@@ -46,7 +74,7 @@ const VerifyAccount = () => {
       await verifyEmail(emailCode);
       toast.success('Email verificado com sucesso!');
       setStep('phone');
-      setResendTimer(60);
+      setResendTimer(0);
       setPhoneCode('');
     } catch (err: any) {
       toast.error(err?.message || 'Código inválido. Tente novamente.');
@@ -91,7 +119,8 @@ const VerifyAccount = () => {
     if (!phoneInput.trim()) return;
     setLoading(true);
     try {
-      await setPhone(phoneInput.trim());
+      await setPhone(normalizePhone(phoneInput));
+      autoSentRef.current.phone = true;
       toast.success('Código enviado por SMS!');
       setResendTimer(60);
       setPhoneCode('');
@@ -207,7 +236,7 @@ const VerifyAccount = () => {
                   <Input
                     value={phoneInput}
                     onChange={e => setPhoneInput(e.target.value)}
-                    placeholder="+244 923 456 789"
+                    placeholder="+2449xxxxxxxx"
                   />
                 </div>
               )}

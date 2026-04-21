@@ -11,6 +11,8 @@ import { initGoogleButton } from "@/lib/google";
 
 const FIRST_VISIT_KEY = "yetustore-first-visit";
 
+const normalizePhone = (phone: string) => phone.replace(/\s+/g, "").trim();
+
 const FirstVisitLoading = () => (
   <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
     <div className="space-y-1">
@@ -115,7 +117,7 @@ const Auth = () => {
         toast.success("Bem-vindo de volta!");
         navigate(redirectTo);
       } else {
-        await signup(form);
+        await signup({ ...form, phone: normalizePhone(form.phone) });
         toast.success("Conta criada! Verifique seu email.");
         navigate("/verify");
       }
