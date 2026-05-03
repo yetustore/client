@@ -1,4 +1,5 @@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 type PaginationControlsProps = {
@@ -27,13 +28,28 @@ const buildPages = (page: number, pageCount: number) => {
   return pages;
 };
 
+const buildMobilePages = (page: number, pageCount: number) => {
+  const pages: Array<number | 'ellipsis'> = [];
+
+  if (pageCount <= 4) {
+    for (let i = 1; i <= pageCount; i += 1) pages.push(i);
+    return pages;
+  }
+
+  if (page <= 2) return [1, 2, 'ellipsis', pageCount];
+  if (page >= pageCount - 1) return [1, 'ellipsis', pageCount - 1, pageCount];
+
+  return [1, page, 'ellipsis', pageCount];
+};
+
 const PaginationControls = ({ page, pageCount, onPageChange, className }: PaginationControlsProps) => {
   if (pageCount <= 1) return null;
-  const pages = buildPages(page, pageCount);
+  const isMobile = useIsMobile();
+  const pages = isMobile ? buildMobilePages(page, pageCount) : buildPages(page, pageCount);
 
   return (
     <Pagination className={cn('mt-6', className)}>
-      <PaginationContent>
+      <PaginationContent className="flex-nowrap">
         <PaginationItem>
           <PaginationPrevious
             href="#"
