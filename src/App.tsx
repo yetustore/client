@@ -21,10 +21,11 @@ import Affiliates from "./pages/Affiliates";
 import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import Invite from "./pages/Invite";
-import First from "@/components/ProtectedRoute";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+const First = ProtectedRoute;
 
 const AppShell = () => {
   const location = useLocation();
@@ -91,6 +92,7 @@ const AppShell = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

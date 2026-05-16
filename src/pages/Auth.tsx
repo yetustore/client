@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
@@ -296,6 +296,15 @@ const Auth = () => {
                   />
                 </div>
               </div>
+            )}
+
+            {mode === "signup" && (
+              <p className="text-xs text-muted-foreground">
+                Ao clicar em <strong>Criar conta</strong> estará concordando com os{' '}
+                <Link to="/terms" className="font-semibold text-primary hover:underline">
+                  Termos e condições da plataforma
+                </Link>.
+              </p>
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
