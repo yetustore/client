@@ -96,6 +96,8 @@ export interface AffiliateLink {
   clicks: number;
   ordersCount: number;
   createdAt: string;
+  expiresAt?: string;
+  isExpired?: boolean;
   product?: Product;
   affiliateName?: string;
   orders?: AffiliateOrderSummary[];
@@ -107,6 +109,10 @@ export interface AffiliateSummary {
   available: number;
   minWithdraw: number;
   maxWithdraw: number;
+  linksCreatedThisMonth: number;
+  monthlyLinkLimit: number;
+  totalLinks: number;
+  activeLinks: number;
   hasBankDetails: boolean;
   bank?: { accountName: string; bankName: string; iban: string } | null;
 }
