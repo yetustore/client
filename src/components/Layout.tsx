@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
+import { toast } from 'sonner';
 
 const navItems = [
   { path: "/", label: "Produtos", icon: Home },
@@ -26,7 +27,7 @@ const navItems = [
 ];
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, updateProfile } = useAuth();
   const { items, totalItems, totalAmount, updateQuantity, removeItem } =
     useCart();
   const location = useLocation();
@@ -34,6 +35,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [cartOpen, setCartOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [savingEmailConsent, setSavingEmailConsent] = React.useState(false);
   const showMobileSearch = isAuthenticated && location.pathname === "/";
 
   React.useEffect(() => {
@@ -57,6 +59,21 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const closeCart = () => setCartOpen(false);
   const closeMobileMenu = () => setMobileOpen(false);
+
+  const showEmailConsentPrompt = Boolean(user && user.sendEmail === undefined);
+
+  const handleEmailConsent = async (consent: boolean) => {
+    if (!user || savingEmailConsent) return;
+    setSavingEmailConsent(true);
+    try {
+      await updateProfile({ sendEmail: consent });
+      toast.success('Sua preferência de e-mail foi salva.');
+    } catch (err: any) {
+      toast.error(err?.message || 'Falha ao salvar a preferência de e-mail.');
+    } finally {
+      setSavingEmailConsent(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,6 +236,34 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           "
               />
             </form>
+          </div>
+        </section>
+      )}
+
+      {showEmailConsentPrompt && (
+        <section className="border-b border-border bg-primary/10">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium text-foreground">A plataforma agora pode enviar e-mails.</p>
+              <p className="text-sm text-muted-foreground">Deseja receber e-mails da plataforma?</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                onClick={() => handleEmailConsent(true)}
+                disabled={savingEmailConsent}
+              >
+                Sim
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEmailConsent(false)}
+                disabled={savingEmailConsent}
+              >
+                Não
+              </Button>
+            </div>
           </div>
         </section>
       )}

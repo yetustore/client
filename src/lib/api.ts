@@ -159,10 +159,8 @@ export const setPhone = async (phone) => {
 
 // update client profile information (name, email, etc.)
 export const updateClientProfile = async (payload) => {
-  // backend currently expects PATCH to /auth/client/me
-  // adjust path/method if the API differs
-  const data = await apiFetch('/auth/client/me', {
-    method: 'PATCH',
+  const data = await apiFetch('/auth/client/profile', {
+    method: 'POST',
     body: JSON.stringify(payload),
   });
   return data.user;
