@@ -33,7 +33,7 @@ const Footer = () => (
           </ul>
         </div>
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-foreground">Compre no YetuStore</h4>
+          <h4 className="text-sm font-semibold text-foreground">Compre na YetuStore</h4>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li>Solicitação de orçamento</li>
             <li>Programa de membros</li>
